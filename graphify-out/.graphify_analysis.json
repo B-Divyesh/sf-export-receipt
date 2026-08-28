@@ -200,13 +200,13 @@
   },
   "gods": [
     {
-      "id": "tsconfig_compileroptions",
-      "label": "compilerOptions",
+      "id": "src_main_report",
+      "label": "report()",
       "degree": 13
     },
     {
-      "id": "src_main_report",
-      "label": "report()",
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
       "degree": 13
     },
     {
@@ -215,23 +215,23 @@
       "degree": 9
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
-      "degree": 9
-    },
-    {
       "id": "src_main_render",
       "label": "render()",
       "degree": 9
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
-      "degree": 8
+      "id": "src_main_shell",
+      "label": "shell()",
+      "degree": 9
     },
     {
       "id": "src_inspect_inspectfile",
       "label": "inspectFile()",
+      "degree": 8
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 8
     },
     {
@@ -240,13 +240,13 @@
       "degree": 7
     },
     {
-      "id": "src_inspectors_inspectcategories",
-      "label": "inspectCategories()",
+      "id": "src_inspect_sampleinspection",
+      "label": "sampleInspection()",
       "degree": 5
     },
     {
-      "id": "tsconfig_compileroptions_lib",
-      "label": "lib",
+      "id": "src_inspect_receiptdata",
+      "label": "receiptData()",
       "degree": 5
     }
   ],
