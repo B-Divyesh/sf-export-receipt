@@ -1,13 +1,44 @@
 {
   "communities": {
     "0": [
+      "docref_rfc_4180",
+      "src_inspect",
+      "src_inspect_analyzeentries",
+      "src_inspect_base64urltobytes",
+      "src_inspect_bytestobase64url",
+      "src_inspect_classify",
+      "src_inspect_countcsvrecords",
+      "src_inspect_countrecords",
+      "src_inspect_datesin",
+      "src_inspect_decode",
+      "src_inspect_inspectfile",
+      "src_inspect_max_source_bytes",
+      "src_inspect_max_text_bytes",
+      "src_inspect_max_zip_entries",
+      "src_inspect_max_zip_expanded_bytes",
+      "src_inspect_max_zip_ratio",
+      "src_inspect_preflightzip",
+      "src_inspect_sampleinspection",
+      "src_inspect_sha256",
+      "src_inspect_validdate",
+      "src_inspect_verifyreceipt",
+      "src_inspect_worker",
+      "src_inspect_zippreflight",
+      "tests_inspect_test"
+    ],
+    "1": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_es2022",
       "ref_src",
       "ref_tests",
+      "ref_webworker",
       "tsconfig",
       "tsconfig_compileroptions",
       "tsconfig_compileroptions_allowjs",
       "tsconfig_compileroptions_esmoduleinterop",
       "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_lib",
       "tsconfig_compileroptions_module",
       "tsconfig_compileroptions_moduleresolution",
       "tsconfig_compileroptions_noemit",
@@ -18,25 +49,9 @@
       "tsconfig_compileroptions_usedefineforclassfields",
       "tsconfig_include"
     ],
-    "1": [
-      "src_inspect",
-      "src_inspect_analyzeentries",
-      "src_inspect_classify",
-      "src_inspect_countrecords",
-      "src_inspect_datesin",
-      "src_inspect_decode",
-      "src_inspect_inspectfile",
-      "src_inspect_sampleinspection",
-      "src_inspect_sha256",
-      "src_types",
-      "src_types_fileentry",
-      "src_types_finding",
-      "src_types_findinglevel",
-      "src_types_inspection",
-      "tests_inspect_test"
-    ],
     "2": [
       "src_inspect_receiptdata",
+      "src_inspect_receiptpayload",
       "src_main",
       "src_main_bytes",
       "src_main_demobar",
@@ -46,6 +61,7 @@
       "src_main_handlefile",
       "src_main_info",
       "src_main_landing",
+      "src_main_notfound",
       "src_main_receipthtml",
       "src_main_render",
       "src_main_report",
@@ -53,6 +69,23 @@
       "src_main_shell"
     ],
     "3": [
+      "axe_core_playwright",
+      "lighthouse",
+      "package_devdependencies",
+      "package_devdependencies_axe_core_playwright",
+      "package_devdependencies_lighthouse",
+      "package_devdependencies_playwright",
+      "package_devdependencies_types_node",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vite",
+      "package_devdependencies_vitest",
+      "playwright",
+      "types_node",
+      "typescript",
+      "vite",
+      "vitest"
+    ],
+    "4": [
       "fflate",
       "package",
       "package_dependencies",
@@ -62,56 +95,74 @@
       "package_scripts",
       "package_scripts_build",
       "package_scripts_dev",
+      "package_scripts_lint",
       "package_scripts_preview",
       "package_scripts_test",
       "package_scripts_test_watch",
       "package_type",
       "package_version"
     ],
-    "4": [
-      "lighthouse",
-      "package_devdependencies",
-      "package_devdependencies_lighthouse",
-      "package_devdependencies_types_node",
-      "package_devdependencies_typescript",
-      "package_devdependencies_vite",
-      "package_devdependencies_vitest",
-      "types_node",
-      "typescript",
-      "vite",
-      "vitest"
-    ],
     "5": [
-      "ref_dom",
-      "ref_dom_iterable",
-      "ref_es2022",
-      "ref_webworker",
-      "tsconfig_compileroptions_lib"
+      "src_inspectors",
+      "src_inspectors_check",
+      "src_inspectors_exportinspector",
+      "src_inspectors_exportinspector_inspect",
+      "src_inspectors_exportinspector_matches",
+      "src_inspectors_has",
+      "src_inspectors_inspectcategories",
+      "src_inspectors_inspectors",
+      "src_types",
+      "src_types_categorycheck",
+      "src_types_fileentry",
+      "src_types_finding",
+      "src_types_findinglevel",
+      "src_types_inspection"
     ],
     "6": [
+      "scripts_browser_tests",
+      "scripts_browser_tests_consoleerrors",
+      "scripts_browser_tests_demo",
+      "scripts_browser_tests_downloadjson",
+      "scripts_browser_tests_freshpage",
+      "scripts_browser_tests_selected"
+    ],
+    "7": [
+      "scripts_postbuild",
+      "scripts_postbuild_assets",
+      "scripts_postbuild_cacheid",
+      "scripts_postbuild_emitted",
+      "scripts_postbuild_entry",
+      "scripts_postbuild_manifest"
+    ],
+    "8": [
       "scripts_test",
       "scripts_test_args",
       "scripts_test_grepat",
-      "scripts_test_result"
+      "scripts_test_run"
     ],
-    "7": [
-      "public_sw",
-      "public_sw_app"
+    "9": [
+      "public_sw"
     ],
-    "8": [
+    "10": [
+      "src_vite_env_d"
+    ],
+    "11": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.125,
-    "1": 0.26666666666666666,
-    "2": 0.3523809523809524,
-    "3": 0.14285714285714285,
-    "4": 0.18181818181818182,
-    "5": 0.4,
-    "6": 0.5,
-    "7": 1.0,
-    "8": 1.0
+    "0": 0.15579710144927536,
+    "1": 0.09523809523809523,
+    "2": 0.3088235294117647,
+    "3": 0.13333333333333333,
+    "4": 0.13333333333333333,
+    "5": 0.18681318681318682,
+    "6": 0.3333333333333333,
+    "7": 0.3333333333333333,
+    "8": 0.5,
+    "9": 1.0,
+    "10": 1.0,
+    "11": 1.0
   },
   "gods": [
     {
@@ -122,31 +173,36 @@
     {
       "id": "src_main_report",
       "label": "report()",
-      "degree": 11
+      "degree": 12
     },
     {
       "id": "src_inspect_analyzeentries",
       "label": "analyzeEntries()",
-      "degree": 8
-    },
-    {
-      "id": "src_inspect_sampleinspection",
-      "label": "sampleInspection()",
-      "degree": 7
+      "degree": 10
     },
     {
       "id": "src_main_render",
       "label": "render()",
+      "degree": 8
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 7
     },
     {
       "id": "src_inspect_inspectfile",
       "label": "inspectFile()",
-      "degree": 6
+      "degree": 7
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
+      "id": "src_main_shell",
+      "label": "shell()",
+      "degree": 7
+    },
+    {
+      "id": "src_inspect_sampleinspection",
+      "label": "sampleInspection()",
       "degree": 6
     },
     {
@@ -155,17 +211,23 @@
       "degree": 6
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
-      "degree": 6
-    },
-    {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_landing",
+      "label": "landing()",
       "degree": 6
     }
   ],
   "surprises": [
+    {
+      "source": "analyzeEntries()",
+      "target": "inspectCategories()",
+      "source_files": [
+        "src/inspect.ts",
+        "src/inspectors.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
     {
       "source": "handleFile()",
       "target": "inspectFile()",
@@ -200,19 +262,8 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "receiptHtml()",
-      "target": "receiptData()",
-      "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "cross-file semantic connection"
-    },
-    {
       "source": "report()",
-      "target": "receiptData()",
+      "target": "receiptPayload()",
       "source_files": [
         "src/main.ts",
         "src/inspect.ts"
