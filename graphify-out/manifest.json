@@ -1,116 +1,158 @@
 {
   ".factory/claims.json": {
-    "mtime": 1787949416.1253855,
-    "seen": 1787949417.0556853,
-    "ast_hash": "be1cfb4781e43049779e19c1cc1858c1",
-    "semantic_hash": "be1cfb4781e43049779e19c1cc1858c1"
+    "mtime": 1787951966.1705053,
+    "seen": 1787951967.2156212,
+    "ast_hash": "69b1eac4b507e254589602d38456c68f",
+    "semantic_hash": "69b1eac4b507e254589602d38456c68f"
   },
   "assets/src/archive-workbench.png.json": {
-    "mtime": 1787949416.1453862,
-    "seen": 1787949417.0556936,
+    "mtime": 1787951966.194506,
+    "seen": 1787951967.215639,
     "ast_hash": "63846e1a120318016384a0053189a613",
     "semantic_hash": "63846e1a120318016384a0053189a613"
   },
   "package.json": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055695,
-    "ast_hash": "c27418c73393cd3f227b91b68204cfbc",
-    "semantic_hash": "c27418c73393cd3f227b91b68204cfbc"
+    "mtime": 1787951966.194506,
+    "seen": 1787951967.2156408,
+    "ast_hash": "7f41118e22789946b63c284df009d8c9",
+    "semantic_hash": "7f41118e22789946b63c284df009d8c9"
   },
   "public/staticwebapp.config.json": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0556965,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156427,
     "ast_hash": "27b8593adcbe05c74da2559dc9ef22af",
     "semantic_hash": "27b8593adcbe05c74da2559dc9ef22af"
   },
   "public/sw.js": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0556972,
-    "ast_hash": "4e818e2fa6b370bee4e04b5a02227b2e",
-    "semantic_hash": "4e818e2fa6b370bee4e04b5a02227b2e"
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156446,
+    "ast_hash": "f82bdb7fdaa8974a85501399616f589e",
+    "semantic_hash": "f82bdb7fdaa8974a85501399616f589e"
   },
   "scripts/test.mjs": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0557008,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156518,
     "ast_hash": "4b929419ea5c53b70d80ec6e44a1704e",
     "semantic_hash": "4b929419ea5c53b70d80ec6e44a1704e"
   },
   "src/inspect.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055703,
-    "ast_hash": "e0f51164c38b762f8938c5b2294e27ad",
-    "semantic_hash": "e0f51164c38b762f8938c5b2294e27ad"
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156541,
+    "ast_hash": "f597675872bcb39a43f45cee18e668c8",
+    "semantic_hash": "f597675872bcb39a43f45cee18e668c8"
   },
   "src/main.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055705,
-    "ast_hash": "3c5d4dd208099c1218fddf81c1d7bd0b",
-    "semantic_hash": "3c5d4dd208099c1218fddf81c1d7bd0b"
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156563,
+    "ast_hash": "e77b16c98c6d4a371bacb37923948775",
+    "semantic_hash": "e77b16c98c6d4a371bacb37923948775"
   },
   "src/types.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055706,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156572,
     "ast_hash": "d79b299a827e4099355530335ce914ce",
     "semantic_hash": "d79b299a827e4099355530335ce914ce"
   },
   "tests/inspect.test.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055708,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.215659,
     "ast_hash": "a6710987e74ad48d26ea54590843fa96",
     "semantic_hash": "a6710987e74ad48d26ea54590843fa96"
   },
   "tsconfig.json": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055709,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156603,
     "ast_hash": "cbc25b2d82433bddfe941e3586ef6aac",
     "semantic_hash": "cbc25b2d82433bddfe941e3586ef6aac"
   },
   "vite.config.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0557103,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156613,
     "ast_hash": "b08e4ddabfc015dd96a574df1f3ba798",
     "semantic_hash": "b08e4ddabfc015dd96a574df1f3ba798"
   },
   "scripts/browser-tests.mjs": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0556984,
-    "ast_hash": "87334346d783e97d7d09b026df70bcb9",
-    "semantic_hash": "87334346d783e97d7d09b026df70bcb9"
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156463,
+    "ast_hash": "4c1fa3636df0155a346857c3cc8b980f",
+    "semantic_hash": "4c1fa3636df0155a346857c3cc8b980f"
   },
   "scripts/postbuild.mjs": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0556998,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156494,
     "ast_hash": "43b5b12658f902cc40122ab6d238cd95",
     "semantic_hash": "43b5b12658f902cc40122ab6d238cd95"
   },
   "src/inspect-worker.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.0557017,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.215653,
     "ast_hash": "d0326bd395b7c21124e1645e59221301",
     "semantic_hash": "d0326bd395b7c21124e1645e59221301"
   },
   "src/inspectors.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055704,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.215655,
     "ast_hash": "15c4d0409a8905935f7d42f73cf1cc5e",
     "semantic_hash": "15c4d0409a8905935f7d42f73cf1cc5e"
   },
   "src/vite-env.d.ts": {
-    "mtime": 1787949416.1493862,
-    "seen": 1787949417.055707,
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156582,
     "ast_hash": "0352474ba2918efe13895edbc3780d94",
     "semantic_hash": "0352474ba2918efe13895edbc3780d94"
   },
   "artifacts/live/lighthouse.json": {
-    "mtime": 1787949416.1253855,
-    "seen": 1787949417.05569,
+    "mtime": 1787951966.1745055,
+    "seen": 1787951967.2156312,
     "ast_hash": "f075debbc424009c897852501e1b7205",
     "semantic_hash": "f075debbc424009c897852501e1b7205"
   },
   "artifacts/live/verify.json": {
-    "mtime": 1787949416.133386,
-    "seen": 1787949417.0556922,
+    "mtime": 1787951966.1825056,
+    "seen": 1787951967.2156353,
     "ast_hash": "658245479bd6bd6343418e41eab9f23b",
     "semantic_hash": "658245479bd6bd6343418e41eab9f23b"
+  },
+  "artifacts/axe-local.json": {
+    "mtime": 1787951966.1705053,
+    "seen": 1787951967.2156255,
+    "ast_hash": "4c3e8299e68d11b803aef0a161937edc",
+    "semantic_hash": "4c3e8299e68d11b803aef0a161937edc"
+  },
+  "artifacts/lighthouse-local.json": {
+    "mtime": 1787951966.1745055,
+    "seen": 1787951967.215627,
+    "ast_hash": "8ae359cf26f897ddeb005a4a60b7e765",
+    "semantic_hash": "8ae359cf26f897ddeb005a4a60b7e765"
+  },
+  "artifacts/live/axe-polish-3.json": {
+    "mtime": 1787951966.1745055,
+    "seen": 1787951967.2156284,
+    "ast_hash": "7218e85f3961f960ed862cc193c4c329",
+    "semantic_hash": "7218e85f3961f960ed862cc193c4c329"
+  },
+  "artifacts/live/lighthouse-polish-3.json": {
+    "mtime": 1787951966.1745055,
+    "seen": 1787951967.2156296,
+    "ast_hash": "5d29910701499b37ff6e3d7a95cb115b",
+    "semantic_hash": "5d29910701499b37ff6e3d7a95cb115b"
+  },
+  "artifacts/live/polish-3-verify.json": {
+    "mtime": 1787951966.1785054,
+    "seen": 1787951967.2156324,
+    "ast_hash": "da8e2e7c2a8d549c489d979049f7f78c",
+    "semantic_hash": "da8e2e7c2a8d549c489d979049f7f78c"
+  },
+  "artifacts/live/polish-3/verify.json": {
+    "mtime": 1787951966.1825056,
+    "seen": 1787951967.2156334,
+    "ast_hash": "6baea4093fd74790e2119358cd50e15d",
+    "semantic_hash": "6baea4093fd74790e2119358cd50e15d"
+  },
+  "scripts/live-checks.mjs": {
+    "mtime": 1787951966.198506,
+    "seen": 1787951967.2156477,
+    "ast_hash": "8e8bdabf167fe326a3ffbbf84e4682b6",
+    "semantic_hash": "8e8bdabf167fe326a3ffbbf84e4682b6"
   }
 }

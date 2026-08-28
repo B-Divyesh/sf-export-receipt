@@ -23,6 +23,11 @@
       "src_inspect_verifyreceipt",
       "src_inspect_worker",
       "src_inspect_zippreflight",
+      "src_types",
+      "src_types_fileentry",
+      "src_types_finding",
+      "src_types_findinglevel",
+      "src_types_inspection",
       "tests_inspect_test"
     ],
     "1": [
@@ -44,9 +49,11 @@
       "src_main_receipthtml",
       "src_main_render",
       "src_main_report",
+      "src_main_resetdemo",
       "src_main_route",
       "src_main_setmeta",
       "src_main_shell",
+      "src_main_syncworkspaceto",
       "src_main_verifyuploadedreceipt"
     ],
     "2": [
@@ -73,6 +80,24 @@
       "tsconfig_include"
     ],
     "3": [
+      "fflate",
+      "package",
+      "package_dependencies",
+      "package_dependencies_fflate",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_preview",
+      "package_scripts_test",
+      "package_scripts_test_watch",
+      "package_scripts_verify_live",
+      "package_type",
+      "package_version"
+    ],
+    "4": [
       "axe_core_playwright",
       "lighthouse",
       "package_devdependencies",
@@ -89,38 +114,20 @@
       "vite",
       "vitest"
     ],
-    "4": [
-      "fflate",
-      "package",
-      "package_dependencies",
-      "package_dependencies_fflate",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_lint",
-      "package_scripts_preview",
-      "package_scripts_test",
-      "package_scripts_test_watch",
-      "package_type",
-      "package_version"
-    ],
     "5": [
-      "src_inspectors",
-      "src_inspectors_check",
-      "src_inspectors_exportinspector",
-      "src_inspectors_exportinspector_inspect",
-      "src_inspectors_exportinspector_matches",
-      "src_inspectors_has",
-      "src_inspectors_inspectcategories",
-      "src_inspectors_inspectors",
-      "src_types",
-      "src_types_categorycheck",
-      "src_types_fileentry",
-      "src_types_finding",
-      "src_types_findinglevel",
-      "src_types_inspection"
+      "scripts_live_checks",
+      "scripts_live_checks_assert",
+      "scripts_live_checks_baseurl",
+      "scripts_live_checks_checks",
+      "scripts_live_checks_consoleerrors",
+      "scripts_live_checks_demo",
+      "scripts_live_checks_failures",
+      "scripts_live_checks_freshpage",
+      "scripts_live_checks_isexpected404console",
+      "scripts_live_checks_readdownload",
+      "scripts_live_checks_record",
+      "scripts_live_checks_result",
+      "scripts_live_checks_storage"
     ],
     "6": [
       "scripts_browser_tests",
@@ -134,6 +141,17 @@
       "scripts_browser_tests_setgeneratedfile"
     ],
     "7": [
+      "src_inspectors",
+      "src_inspectors_check",
+      "src_inspectors_exportinspector",
+      "src_inspectors_exportinspector_inspect",
+      "src_inspectors_exportinspector_matches",
+      "src_inspectors_has",
+      "src_inspectors_inspectcategories",
+      "src_inspectors_inspectors",
+      "src_types_categorycheck"
+    ],
+    "8": [
       "scripts_postbuild",
       "scripts_postbuild_assets",
       "scripts_postbuild_cacheid",
@@ -141,45 +159,46 @@
       "scripts_postbuild_entry",
       "scripts_postbuild_manifest"
     ],
-    "8": [
+    "9": [
       "scripts_test",
       "scripts_test_args",
       "scripts_test_grepat",
       "scripts_test_run"
     ],
-    "9": [
+    "10": [
       "public_sw"
     ],
-    "10": [
+    "11": [
       "src_vite_env_d"
     ],
-    "11": [
+    "12": [
       "vite_config"
     ]
   },
   "cohesion": {
-    "0": 0.16600790513833993,
-    "1": 0.21645021645021645,
+    "0": 0.13227513227513227,
+    "1": 0.1956521739130435,
     "2": 0.09523809523809523,
-    "3": 0.13333333333333333,
+    "3": 0.125,
     "4": 0.13333333333333333,
-    "5": 0.17582417582417584,
+    "5": 0.15384615384615385,
     "6": 0.2222222222222222,
-    "7": 0.3333333333333333,
-    "8": 0.5,
-    "9": 1.0,
+    "7": 0.2777777777777778,
+    "8": 0.3333333333333333,
+    "9": 0.5,
     "10": 1.0,
-    "11": 1.0
+    "11": 1.0,
+    "12": 1.0
   },
   "gods": [
     {
-      "id": "src_main_report",
-      "label": "report()",
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
       "degree": 13
     },
     {
-      "id": "tsconfig_compileroptions",
-      "label": "compilerOptions",
+      "id": "src_main_report",
+      "label": "report()",
       "degree": 13
     },
     {
@@ -195,6 +214,11 @@
     {
       "id": "src_main_render",
       "label": "render()",
+      "degree": 9
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 8
     },
     {
@@ -203,23 +227,18 @@
       "degree": 7
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_route",
+      "label": "route()",
       "degree": 7
     },
     {
-      "id": "src_inspect_sampleinspection",
-      "label": "sampleInspection()",
-      "degree": 6
+      "id": "src_inspectors_inspectcategories",
+      "label": "inspectCategories()",
+      "degree": 5
     },
     {
-      "id": "src_main_route",
-      "label": "route()",
-      "degree": 6
-    },
-    {
-      "id": "src_inspect_receiptdata",
-      "label": "receiptData()",
+      "id": "tsconfig_compileroptions_lib",
+      "label": "lib",
       "degree": 5
     }
   ],
@@ -238,17 +257,6 @@
     {
       "source": "handleFile()",
       "target": "inspectFile()",
-      "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "bridges separate communities"
-    },
-    {
-      "source": "enterDemo()",
-      "target": "sampleInspection()",
       "source_files": [
         "src/main.ts",
         "src/inspect.ts"
@@ -278,6 +286,17 @@
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "bridges separate communities"
+    },
+    {
+      "source": "report()",
+      "target": "receiptPayload()",
+      "source_files": [
+        "src/main.ts",
+        "src/inspect.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
     }
   ],
   "tokens": {
