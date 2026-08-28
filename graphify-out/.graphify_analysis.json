@@ -186,11 +186,6 @@
       "degree": 8
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
-      "degree": 7
-    },
-    {
       "id": "src_inspect_inspectfile",
       "label": "inspectFile()",
       "degree": 7
@@ -201,18 +196,23 @@
       "degree": 7
     },
     {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 7
+    },
+    {
       "id": "src_inspect_sampleinspection",
       "label": "sampleInspection()",
       "degree": 6
     },
     {
-      "id": "src_main_route",
-      "label": "route()",
+      "id": "src_main_landing",
+      "label": "landing()",
       "degree": 6
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
+      "id": "src_main_route",
+      "label": "route()",
       "degree": 6
     }
   ],
@@ -263,7 +263,7 @@
     },
     {
       "source": "report()",
-      "target": "receiptPayload()",
+      "target": "receiptData()",
       "source_files": [
         "src/main.ts",
         "src/inspect.ts"
