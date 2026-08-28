@@ -10,6 +10,7 @@ mkdirSync(evidenceDir, { recursive: true });
 const failures = [];
 const consoleErrors = [];
 const checks = [];
+const isExpected404Console = (message) => /Failed to load resource: the server responded with a status of 404/.test(message);
 const assert = (condition, message) => {
   if (!condition) throw new Error(message);
 };
@@ -50,21 +51,22 @@ try {
   assert(rootResponse?.status() === 200, `Cold root returned ${rootResponse?.status()}.`);
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
   assert(await root.page.evaluate(() => document.activeElement === document.body), 'Cold load moved focus away from the document start.');
+  await root.page.screenshot({ path: `${evidenceDir}/polish-3-root-mobile.png`, fullPage: false });
   await root.page.keyboard.press('Tab');
   assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Skip to inspection', 'Skip link is not the first Tab target.');
+  await root.page.screenshot({ path: `${evidenceDir}/polish-3-focus-mobile.png`, fullPage: false });
   const firstScreenBottom = await root.page.locator('.hero-actions,.facts').evaluateAll((items) => Math.max(...items.map((item) => item.getBoundingClientRect().bottom)));
   assert(firstScreenBottom <= 844, `First-screen facts end at ${firstScreenBottom}px.`);
   for (const name of ['Demo', 'Privacy']) {
     const box = await root.page.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name }).boundingBox();
     assert(box && box.width >= 44 && box.height >= 44, `Mobile ${name} target is under 44px.`);
   }
-  await root.page.screenshot({ path: `${evidenceDir}/polish-3-root-mobile.png`, fullPage: false });
   record('cold first screen', `${Math.round(firstScreenBottom)}px bottom`);
 
   await root.page.getByRole('button', { name: 'Try it with sample data' }).click();
   await root.page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
   assert(new URL(root.page.url()).pathname === '/demo', 'One-click action did not open /demo.');
-  assert(await root.page.getByRole('region', { name: 'Demo controls' }).count() === 1, 'Demo banner is missing.');
+  assert(await root.page.getByRole('complementary', { name: 'Demo controls' }).count() === 1, 'Demo banner is missing.');
   assert(await root.page.locator('tbody tr').count() === 4, 'Demo does not show four sample files.');
   await root.page.getByText('2 successfully parsed JSON or CSV files; 1 attachment.').waitFor();
   await root.page.getByText('Date coverage: 2022-02-19 to 2025-01-08').waitFor();
@@ -73,13 +75,13 @@ try {
   await root.page.screenshot({ path: `${evidenceDir}/polish-3-demo-mobile.png`, fullPage: true });
   await root.page.goBack();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
-  assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('region', { name: 'Demo controls' }).count() === 0, 'Back remained trapped in demo mode.');
+  assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('complementary', { name: 'Demo controls' }).count() === 0, 'Back remained trapped in demo mode.');
   assert(await root.page.evaluate(() => document.activeElement?.tagName) === 'H1', 'Back did not focus the landing h1.');
   await root.page.screenshot({ path: `${evidenceDir}/polish-3-demo-back-mobile.png`, fullPage: false });
   await demo(root.page);
   await root.page.getByRole('link', { name: 'EXPORT RECEIPT' }).click();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
-  assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('region', { name: 'Demo controls' }).count() === 0, 'Wordmark remained trapped in demo mode.');
+  assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('complementary', { name: 'Demo controls' }).count() === 0, 'Wordmark remained trapped in demo mode.');
   record('demo Back and Home', 'both return to / and discard the banner');
   await root.context.close();
 
@@ -150,6 +152,7 @@ try {
       await view.page.screenshot({ path: `${evidenceDir}/polish-3-privacy-mobile.png`, fullPage: true });
     }
     if (route.path === '/terms') await view.page.screenshot({ path: `${evidenceDir}/polish-3-terms-mobile.png`, fullPage: true });
+    if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-3-receipt-empty-mobile.png`, fullPage: true });
     await view.context.close();
   }
   record('routes, metadata, legal, mobile, axe', `${routes.length} SPA routes passed direct cold checks`);
@@ -191,14 +194,15 @@ try {
   record('reduced motion', transition);
   await reduced.context.close();
 
-  assert(!consoleErrors.length, `Console errors: ${consoleErrors.join(' | ')}`);
+  const unexpectedConsoleErrors = consoleErrors.filter((message) => !isExpected404Console(message));
+  assert(!unexpectedConsoleErrors.length, `Console errors: ${unexpectedConsoleErrors.join(' | ')}`);
 } catch (error) {
   failures.push(error instanceof Error ? error.stack || error.message : String(error));
 } finally {
   await browser.close();
 }
 
-const result = { baseURL, checkedAt: new Date().toISOString(), passed: failures.length === 0, checks, consoleErrors, failures };
+const result = { baseURL, checkedAt: new Date().toISOString(), passed: failures.length === 0, checks, consoleErrors: consoleErrors.filter((message) => !isExpected404Console(message)), expected404Console: consoleErrors.filter(isExpected404Console), failures };
 writeFileSync(`${evidenceDir}/polish-3-verify.json`, `${JSON.stringify(result, null, 2)}\n`);
 console.log(JSON.stringify(result, null, 2));
 if (failures.length) process.exit(1);

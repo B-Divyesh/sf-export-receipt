@@ -1,0 +1,44 @@
+{
+  "baseURL": "https://export-receipt.sociobot.in",
+  "checkedAt": "2026-08-28T21:00:41.803Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "cold first screen",
+      "detail": "599px bottom"
+    },
+    {
+      "name": "demo Back and Home",
+      "detail": "both return to / and discard the banner"
+    },
+    {
+      "name": "query demo and isolation",
+      "detail": "real storage unchanged; no external, API, credential, or non-GET traffic"
+    },
+    {
+      "name": "receipt outputs",
+      "detail": "plain HTML evidence; signed JSON valid/tampered verification"
+    },
+    {
+      "name": "routes, metadata, legal, mobile, axe",
+      "detail": "5 SPA routes passed direct cold checks"
+    },
+    {
+      "name": "sitemap, 404, headers",
+      "detail": "all routes listed; unknown URL is styled HTTP 404; CSP/nosniff/referrer policy present"
+    },
+    {
+      "name": "offline after one visit",
+      "detail": "complete four-file sample reloaded offline"
+    },
+    {
+      "name": "reduced motion",
+      "detail": "1e-05s"
+    }
+  ],
+  "consoleErrors": [],
+  "expected404Console": [
+    "Failed to load resource: the server responded with a status of 404 ()"
+  ],
+  "failures": []
+}

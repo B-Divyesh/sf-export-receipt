@@ -197,6 +197,7 @@ try {
     const realBeforeDemo = await browserStorage(page);
     await demo(page, '/?demo=1');
     if (new URL(page.url()).pathname !== '/demo') throw new Error('The documented ?demo=1 entry did not open the isolated demo.');
+    if (await page.getByRole('complementary', { name: 'Demo controls' }).count() !== 1) throw new Error('The documented demo entry did not show its persistent banner.');
     requests.length = 0;
     await page.getByRole('button', { name: 'Use light colors' }).click();
     await page.getByRole('button', { name: 'Reset demo' }).click();
@@ -206,7 +207,7 @@ try {
     if (JSON.stringify(during) !== JSON.stringify(realBeforeDemo)) throw new Error(`Demo changed real browser data: ${JSON.stringify({ realBeforeDemo, during })}`);
     await page.getByRole('button', { name: 'Start for real' }).click();
     await page.locator('#archive').waitFor();
-    if (new URL(page.url()).pathname !== '/' || await page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('Leaving the demo did not discard the sample workspace.');
+    if (new URL(page.url()).pathname !== '/' || await page.getByRole('complementary', { name: 'Demo controls' }).count()) throw new Error('Leaving the demo did not discard the sample workspace.');
     const after = await browserStorage(page);
     const demoTraffic = requests.filter((request) => request.method !== 'GET' || ['fetch', 'xhr', 'eventsource', 'websocket'].includes(request.type));
     if (JSON.stringify(after) !== JSON.stringify(realBeforeDemo) || demoTraffic.length) throw new Error(`Demo persisted data or made data requests: ${JSON.stringify({ after, demoTraffic })}`);
@@ -219,7 +220,7 @@ try {
     if (await back.page.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Your export at a glance') throw new Error('Entering the demo did not move focus to its final heading.');
     await back.page.goBack();
     await back.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
-    if (new URL(back.page.url()).pathname !== '/' || await back.page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('Browser Back did not leave the demo and discard its sample workspace.');
+    if (new URL(back.page.url()).pathname !== '/' || await back.page.getByRole('complementary', { name: 'Demo controls' }).count()) throw new Error('Browser Back did not leave the demo and discard its sample workspace.');
     if (await back.page.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('Browser Back from the demo did not move focus to the landing heading.');
     await back.page.locator('.hero-art img').evaluate((image) => image.complete ? undefined : new Promise((resolve) => image.addEventListener('load', resolve, { once: true })));
     await back.page.screenshot({ path: 'artifacts/demo-exit-mobile.png', fullPage: false });
@@ -229,7 +230,7 @@ try {
     await demo(home.page);
     await home.page.getByRole('link', { name: 'EXPORT RECEIPT' }).click();
     await home.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
-    if (new URL(home.page.url()).pathname !== '/' || await home.page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('The wordmark did not leave the demo and discard its sample workspace.');
+    if (new URL(home.page.url()).pathname !== '/' || await home.page.getByRole('complementary', { name: 'Demo controls' }).count()) throw new Error('The wordmark did not leave the demo and discard its sample workspace.');
     if (await home.page.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('The wordmark route did not move focus to the landing heading.');
     await home.context.close();
   }
