@@ -110,17 +110,6 @@
       "source_location": "L160"
     },
     {
-      "id": "src_inspect_bytestobase64url",
-      "label": "bytesToBase64Url()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "file_type": "code",
-      "norm_label": "bytestobase64url()",
-      "source_file": "src/inspect.ts",
-      "source_location": "L159"
-    },
-    {
       "id": "src_inspect_classify",
       "label": "classify()",
       "_callable": true,
@@ -198,17 +187,6 @@
       "source_location": "L98"
     },
     {
-      "id": "src_inspect_sampleinspection",
-      "label": "sampleInspection()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 0,
-      "file_type": "code",
-      "norm_label": "sampleinspection()",
-      "source_file": "src/inspect.ts",
-      "source_location": "L147"
-    },
-    {
       "id": "src_inspect_sha256",
       "label": "sha256()",
       "_callable": true,
@@ -242,6 +220,17 @@
       "source_location": "L170"
     },
     {
+      "id": "src_inspect_bytestobase64url",
+      "label": "bytesToBase64Url()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": "bytestobase64url()",
+      "source_file": "src/inspect.ts",
+      "source_location": "L159"
+    },
+    {
       "id": "src_inspect_receiptdata",
       "label": "receiptData()",
       "_callable": true,
@@ -264,6 +253,17 @@
       "source_location": "L155"
     },
     {
+      "id": "src_inspect_sampleinspection",
+      "label": "sampleInspection()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 2,
+      "file_type": "code",
+      "norm_label": "sampleinspection()",
+      "source_file": "src/inspect.ts",
+      "source_location": "L147"
+    },
+    {
       "id": "src_main_bytes",
       "label": "bytes()",
       "_callable": true,
@@ -272,7 +272,7 @@
       "file_type": "code",
       "norm_label": "bytes()",
       "source_file": "src/main.ts",
-      "source_location": "L12"
+      "source_location": "L13"
     },
     {
       "id": "src_main_demobar",
@@ -283,7 +283,7 @@
       "file_type": "code",
       "norm_label": "demobar()",
       "source_file": "src/main.ts",
-      "source_location": "L28"
+      "source_location": "L37"
     },
     {
       "id": "src_main_download",
@@ -294,7 +294,7 @@
       "file_type": "code",
       "norm_label": "download()",
       "source_file": "src/main.ts",
-      "source_location": "L56"
+      "source_location": "L65"
     },
     {
       "id": "src_main_enterdemo",
@@ -305,7 +305,7 @@
       "file_type": "code",
       "norm_label": "enterdemo()",
       "source_file": "src/main.ts",
-      "source_location": "L54"
+      "source_location": "L63"
     },
     {
       "id": "src_main_escape",
@@ -316,7 +316,7 @@
       "file_type": "code",
       "norm_label": "escape()",
       "source_file": "src/main.ts",
-      "source_location": "L13"
+      "source_location": "L14"
     },
     {
       "id": "src_main_handlefile",
@@ -327,7 +327,7 @@
       "file_type": "code",
       "norm_label": "handlefile()",
       "source_file": "src/main.ts",
-      "source_location": "L55"
+      "source_location": "L64"
     },
     {
       "id": "src_main_info",
@@ -338,7 +338,7 @@
       "file_type": "code",
       "norm_label": "info()",
       "source_file": "src/main.ts",
-      "source_location": "L49"
+      "source_location": "L58"
     },
     {
       "id": "src_main_landing",
@@ -349,7 +349,7 @@
       "file_type": "code",
       "norm_label": "landing()",
       "source_file": "src/main.ts",
-      "source_location": "L30"
+      "source_location": "L39"
     },
     {
       "id": "src_main_notfound",
@@ -360,7 +360,7 @@
       "file_type": "code",
       "norm_label": "notfound()",
       "source_file": "src/main.ts",
-      "source_location": "L58"
+      "source_location": "L67"
     },
     {
       "id": "src_main_receipthtml",
@@ -371,7 +371,7 @@
       "file_type": "code",
       "norm_label": "receipthtml()",
       "source_file": "src/main.ts",
-      "source_location": "L57"
+      "source_location": "L66"
     },
     {
       "id": "src_main_render",
@@ -382,7 +382,7 @@
       "file_type": "code",
       "norm_label": "render()",
       "source_file": "src/main.ts",
-      "source_location": "L59"
+      "source_location": "L68"
     },
     {
       "id": "src_main_report",
@@ -393,7 +393,7 @@
       "file_type": "code",
       "norm_label": "report()",
       "source_file": "src/main.ts",
-      "source_location": "L36"
+      "source_location": "L45"
     },
     {
       "id": "src_main_route",
@@ -404,7 +404,7 @@
       "file_type": "code",
       "norm_label": "route()",
       "source_file": "src/main.ts",
-      "source_location": "L15"
+      "source_location": "L16"
     },
     {
       "id": "src_main_shell",
@@ -415,7 +415,7 @@
       "file_type": "code",
       "norm_label": "shell()",
       "source_file": "src/main.ts",
-      "source_location": "L18"
+      "source_location": "L19"
     },
     {
       "id": "src_inspectors_check",
@@ -473,6 +473,17 @@
       "source_location": "L45"
     },
     {
+      "id": "scripts_browser_tests_browserstorage",
+      "label": "browserStorage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "file_type": "code",
+      "norm_label": "browserstorage()",
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L38"
+    },
+    {
       "id": "scripts_browser_tests_demo",
       "label": "demo()",
       "_callable": true,
@@ -481,7 +492,7 @@
       "file_type": "code",
       "norm_label": "demo()",
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L23"
+      "source_location": "L25"
     },
     {
       "id": "scripts_browser_tests_downloadjson",
@@ -492,7 +503,7 @@
       "file_type": "code",
       "norm_label": "downloadjson()",
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L27"
+      "source_location": "L29"
     },
     {
       "id": "scripts_browser_tests_freshpage",
@@ -503,7 +514,7 @@
       "file_type": "code",
       "norm_label": "freshpage()",
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L16"
+      "source_location": "L18"
     },
     {
       "id": "scripts_browser_tests_selected",
@@ -514,7 +525,18 @@
       "file_type": "code",
       "norm_label": "selected()",
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L8"
+      "source_location": "L9"
+    },
+    {
+      "id": "scripts_browser_tests_setgeneratedfile",
+      "label": "setGeneratedFile()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "file_type": "code",
+      "norm_label": "setgeneratedfile()",
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L45"
     },
     {
       "id": "scripts_test_run",
@@ -1198,6 +1220,16 @@
       "source_location": "L1"
     },
     {
+      "id": "scripts_browser_tests_claims",
+      "label": "claims",
+      "_origin": "ast",
+      "community": 6,
+      "file_type": "code",
+      "norm_label": "claims",
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L12"
+    },
+    {
       "id": "scripts_browser_tests_consoleerrors",
       "label": "consoleErrors",
       "_origin": "ast",
@@ -1205,7 +1237,7 @@
       "file_type": "code",
       "norm_label": "consoleerrors",
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L10"
+      "source_location": "L11"
     },
     {
       "id": "scripts_postbuild",
@@ -1522,7 +1554,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L54",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -1534,7 +1566,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L54",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -1546,7 +1578,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L55",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -1558,7 +1590,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L55",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -1570,7 +1602,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L51",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -1582,7 +1614,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L31",
+      "source_location": "L40",
       "weight": 1.0
     },
     {
@@ -1594,7 +1626,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L58",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -1606,7 +1638,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L57",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -1618,7 +1650,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -1630,7 +1662,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -1642,7 +1674,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -1654,7 +1686,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -1666,7 +1698,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L59",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -1678,7 +1710,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L37",
+      "source_location": "L46",
       "weight": 1.0
     },
     {
@@ -1690,7 +1722,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L41",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -1702,7 +1734,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L41",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -1714,7 +1746,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L41",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -1726,7 +1758,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L41",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -1738,7 +1770,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L43",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -1750,7 +1782,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L44",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -1762,7 +1794,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L44",
+      "source_location": "L53",
       "weight": 1.0
     },
     {
@@ -1774,7 +1806,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L45",
+      "source_location": "L54",
       "weight": 1.0
     },
     {
@@ -1786,7 +1818,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -1798,7 +1830,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L22",
+      "source_location": "L23",
       "weight": 1.0
     },
     {
@@ -1810,7 +1842,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/main.ts",
-      "source_location": "L23",
+      "source_location": "L24",
       "weight": 1.0
     },
     {
@@ -2543,7 +2575,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L10",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_browser_tests",
+      "target": "scripts_browser_tests_claims",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L12",
       "weight": 1.0
     },
     {
@@ -2554,7 +2597,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L16",
+      "source_location": "L18",
       "weight": 1.0
     },
     {
@@ -2565,7 +2608,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -2576,7 +2619,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L27",
+      "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_browser_tests",
+      "target": "scripts_browser_tests_browserstorage",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L38",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_browser_tests",
+      "target": "scripts_browser_tests_setgeneratedfile",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/browser-tests.mjs",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -2587,7 +2652,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "scripts/browser-tests.mjs",
-      "source_location": "L8",
+      "source_location": "L9",
       "weight": 1.0
     },
     {
@@ -2983,7 +3048,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L12",
+      "source_location": "L13",
       "weight": 1.0
     },
     {
@@ -2994,7 +3059,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L13",
+      "source_location": "L14",
       "weight": 1.0
     },
     {
@@ -3005,7 +3070,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L15",
+      "source_location": "L16",
       "weight": 1.0
     },
     {
@@ -3016,7 +3081,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -3027,7 +3092,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L28",
+      "source_location": "L37",
       "weight": 1.0
     },
     {
@@ -3038,7 +3103,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L30",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -3049,7 +3114,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L36",
+      "source_location": "L45",
       "weight": 1.0
     },
     {
@@ -3060,7 +3125,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L49",
+      "source_location": "L58",
       "weight": 1.0
     },
     {
@@ -3071,7 +3136,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L54",
+      "source_location": "L63",
       "weight": 1.0
     },
     {
@@ -3082,7 +3147,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L55",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -3093,7 +3158,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L56",
+      "source_location": "L65",
       "weight": 1.0
     },
     {
@@ -3104,7 +3169,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L57",
+      "source_location": "L66",
       "weight": 1.0
     },
     {
@@ -3115,7 +3180,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/main.ts",
-      "source_location": "L58",
+      "source_location": "L67",
+      "weight": 1.0
+    },
+    {
+      "source": "src_main",
+      "target": "src_main_render",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/main.ts",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -3362,18 +3438,6 @@
       "weight": 1.0
     },
     {
-      "source": "src_main",
-      "target": "src_main_render",
-      "relation": "indirect_call",
-      "_origin": "ast",
-      "confidence": "INFERRED",
-      "confidence_score": 0.85,
-      "context": "argument",
-      "source_file": "src/main.ts",
-      "source_location": "L16",
-      "weight": 1.0
-    },
-    {
       "source": "src_main_landing",
       "target": "src_main_enterdemo",
       "relation": "indirect_call",
@@ -3382,7 +3446,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main.ts",
-      "source_location": "L32",
+      "source_location": "L41",
       "weight": 1.0
     },
     {
@@ -3394,7 +3458,7 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main.ts",
-      "source_location": "L33",
+      "source_location": "L42",
       "weight": 1.0
     },
     {
@@ -3406,10 +3470,10 @@
       "confidence_score": 0.85,
       "context": "argument",
       "source_file": "src/main.ts",
-      "source_location": "L42",
+      "source_location": "L51",
       "weight": 1.0
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "aae1b98185295b071ab71c72f65a45968cc35a69"
+  "built_at_commit": "2cf61ff312e27d5a4710043f7a95db0e74b0c5c5"
 }

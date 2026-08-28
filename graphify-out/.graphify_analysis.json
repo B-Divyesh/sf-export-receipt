@@ -5,7 +5,6 @@
       "src_inspect",
       "src_inspect_analyzeentries",
       "src_inspect_base64urltobytes",
-      "src_inspect_bytestobase64url",
       "src_inspect_classify",
       "src_inspect_countcsvrecords",
       "src_inspect_countrecords",
@@ -18,7 +17,6 @@
       "src_inspect_max_zip_expanded_bytes",
       "src_inspect_max_zip_ratio",
       "src_inspect_preflightzip",
-      "src_inspect_sampleinspection",
       "src_inspect_sha256",
       "src_inspect_validdate",
       "src_inspect_verifyreceipt",
@@ -50,8 +48,10 @@
       "tsconfig_include"
     ],
     "2": [
+      "src_inspect_bytestobase64url",
       "src_inspect_receiptdata",
       "src_inspect_receiptpayload",
+      "src_inspect_sampleinspection",
       "src_main",
       "src_main_bytes",
       "src_main_demobar",
@@ -120,11 +120,14 @@
     ],
     "6": [
       "scripts_browser_tests",
+      "scripts_browser_tests_browserstorage",
+      "scripts_browser_tests_claims",
       "scripts_browser_tests_consoleerrors",
       "scripts_browser_tests_demo",
       "scripts_browser_tests_downloadjson",
       "scripts_browser_tests_freshpage",
-      "scripts_browser_tests_selected"
+      "scripts_browser_tests_selected",
+      "scripts_browser_tests_setgeneratedfile"
     ],
     "7": [
       "scripts_postbuild",
@@ -151,13 +154,13 @@
     ]
   },
   "cohesion": {
-    "0": 0.15579710144927536,
+    "0": 0.16883116883116883,
     "1": 0.09523809523809523,
-    "2": 0.3088235294117647,
+    "2": 0.26900584795321636,
     "3": 0.13333333333333333,
     "4": 0.13333333333333333,
     "5": 0.18681318681318682,
-    "6": 0.3333333333333333,
+    "6": 0.2222222222222222,
     "7": 0.3333333333333333,
     "8": 0.5,
     "9": 1.0,
@@ -191,13 +194,13 @@
       "degree": 7
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 7
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_shell",
+      "label": "shell()",
       "degree": 7
     },
     {
@@ -206,13 +209,13 @@
       "degree": 6
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
+      "id": "src_main_route",
+      "label": "route()",
       "degree": 6
     },
     {
-      "id": "src_main_route",
-      "label": "route()",
+      "id": "src_main_landing",
+      "label": "landing()",
       "degree": 6
     }
   ],
@@ -248,7 +251,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "bridges separate communities"
+      "why": "cross-file semantic connection"
     },
     {
       "source": "render()",
@@ -259,7 +262,7 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "bridges separate communities"
+      "why": "cross-file semantic connection"
     },
     {
       "source": "report()",
