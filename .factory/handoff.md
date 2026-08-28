@@ -4,7 +4,7 @@
 
 All 27 cumulative findings in `.factory/review-1.md` through `.factory/review-4.md` are closed. The finding-by-finding record is `.factory/polish-4.md`. The neo-brutalist archive-workbench identity and `pwa-offline` artifact class are unchanged.
 
-The repaired product is at <https://export-receipt.sociobot.in>. Product repair commit: `87289df03b1c0ff0706694e702ec12ca2b9e2013`.
+The repaired product is live at <https://export-receipt.sociobot.in>. Product repair commits: `87289df03b1c0ff0706694e702ec12ca2b9e2013` and `641f254df172332d97cb7338b9e78f037a134904`. Static deployment ID: `fdeb263f-1728-46d3-99b5-211d15f547a2`.
 
 ## What changed
 
@@ -40,9 +40,12 @@ Additional evidence:
 - Local factory URL verifier: pass with no console errors — `artifacts/local-polish-4/verify-url/verify.json`.
 - Local dedicated route/browser/axe/privacy/offline suite: pass — `artifacts/local-polish-4/polish-4-verify.json`.
 - Local Lighthouse `/demo`: performance 99, accessibility 100, best practices 100, SEO 100; FCP 1.0 s, LCP 1.4 s, CLS 0, TBT 120 ms — `artifacts/local-polish-4/lighthouse.json`.
-- Live factory URL verifier: `artifacts/live/polish-4/verify-url/verify.json`.
-- Live dedicated cold-check suite: `artifacts/live/polish-4/polish-4-verify.json`.
+- Live factory URL verifier: pass in 2,043 ms with correct title, `lang=en`, one h1, main, image alt text, and no console errors — `artifacts/live/polish-4/verify-url/verify.json`.
+- Live dedicated cold-check suite: pass with zero unexpected console errors — `artifacts/live/polish-4/polish-4-verify.json`.
+- Live Lighthouse `/demo`: performance 100, accessibility 100, best practices 100, SEO 100; FCP 0.9 s, LCP 1.1 s, CLS 0, TBT 30 ms — `artifacts/live/polish-4/lighthouse.json`.
 - Live screenshots: `artifacts/live/polish-4/`.
+- Cold live link crawl: all five routes and all discovered local assets returned 200; the repository contact returned 200; the designed unknown route returned 404.
+- Live/local bytes match for the app (`8c96a636…`), worker (`9f9ccc6d…`), CSS (`7a6a3063…`), and hero (`44653534…`).
 
 Run locally with `npm ci && npm run dev`. Recheck with `npm test && npm run lint && npm run build`. Recheck production with `npm run verify:live -- https://export-receipt.sociobot.in artifacts/live/polish-4`.
 

@@ -1,6 +1,6 @@
 # Polish round 4 — cumulative zero-finding closure
 
-Released candidate: `46b363a8303353504e16a4b12518fa1e26c3f7ad`. Review commit: `4487bedcffc47b6aacbca27c611bda282b114e14`. Product repair commit: `87289df03b1c0ff0706694e702ec12ca2b9e2013`.
+Released candidate: `46b363a8303353504e16a4b12518fa1e26c3f7ad`. Review commit: `4487bedcffc47b6aacbca27c611bda282b114e14`. Product repair commits: `87289df03b1c0ff0706694e702ec12ca2b9e2013` and `641f254df172332d97cb7338b9e78f037a134904`.
 
 Every finding in `.factory/review-1.md` through `.factory/review-4.md` and every earlier polish record was rechecked. Earlier closure notes were treated as leads, not proof.
 
@@ -44,4 +44,6 @@ Additional polish discovered during repair: singular inventory and check counts 
 - Local factory URL check: `artifacts/local-polish-4/verify-url/verify.json`.
 - Local Lighthouse: `artifacts/local-polish-4/lighthouse.json` — performance 99, accessibility 100, best practices 100, SEO 100.
 - Live dedicated browser suite and screenshots: `artifacts/live/polish-4/`.
+- Live Lighthouse: `artifacts/live/polish-4/lighthouse.json` — 100 in performance, accessibility, best practices, and SEO; LCP 1.1 s, CLS 0, TBT 30 ms.
+- Deployment ID: `fdeb263f-1728-46d3-99b5-211d15f547a2`.
 - Live URL: <https://export-receipt.sociobot.in>.
