@@ -5,7 +5,6 @@
       "src_inspect",
       "src_inspect_analyzeentries",
       "src_inspect_base64urltobytes",
-      "src_inspect_bytestobase64url",
       "src_inspect_classify",
       "src_inspect_countcsvrecords",
       "src_inspect_countrecords",
@@ -31,6 +30,7 @@
       "tests_inspect_test"
     ],
     "1": [
+      "src_inspect_bytestobase64url",
       "src_inspect_receiptdata",
       "src_inspect_receiptpayload",
       "src_main",
@@ -154,6 +154,7 @@
       "scripts_browser_tests_demo",
       "scripts_browser_tests_downloadjson",
       "scripts_browser_tests_freshpage",
+      "scripts_browser_tests_isexpected404console",
       "scripts_browser_tests_samplehash",
       "scripts_browser_tests_samplezip",
       "scripts_browser_tests_selected",
@@ -174,39 +175,42 @@
       "scripts_test_run"
     ],
     "10": [
-      "public_sw"
+      "vite_config",
+      "vite_config_app_routes",
+      "vite_config_configurepreviewserver"
     ],
     "11": [
-      "src_vite_env_d"
+      "public_sw",
+      "public_sw_app_routes"
     ],
     "12": [
-      "vite_config"
+      "src_vite_env_d"
     ]
   },
   "cohesion": {
-    "0": 0.13227513227513227,
-    "1": 0.20948616600790515,
+    "0": 0.1396011396011396,
+    "1": 0.1956521739130435,
     "2": 0.09523809523809523,
     "3": 0.125,
     "4": 0.13333333333333333,
     "5": 0.13333333333333333,
     "6": 0.17582417582417584,
-    "7": 0.18181818181818182,
+    "7": 0.16666666666666666,
     "8": 0.3333333333333333,
     "9": 0.5,
-    "10": 1.0,
+    "10": 0.6666666666666666,
     "11": 1.0,
     "12": 1.0
   },
   "gods": [
     {
-      "id": "src_main_report",
-      "label": "report()",
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
       "degree": 13
     },
     {
-      "id": "tsconfig_compileroptions",
-      "label": "compilerOptions",
+      "id": "src_main_report",
+      "label": "report()",
       "degree": 13
     },
     {
@@ -215,13 +219,13 @@
       "degree": 9
     },
     {
-      "id": "src_main_render",
-      "label": "render()",
+      "id": "src_main_shell",
+      "label": "shell()",
       "degree": 9
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
+      "id": "src_main_render",
+      "label": "render()",
       "degree": 9
     },
     {
