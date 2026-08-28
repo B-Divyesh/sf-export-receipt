@@ -8,6 +8,7 @@ import { zipSync } from 'fflate';
 const grep = process.argv.includes('--grep') ? process.argv[process.argv.indexOf('--grep') + 1] : '';
 const selected = (id) => !grep || grep.includes(id);
 const baseURL = 'http://127.0.0.1:4173';
+const canonicalOrigin = 'https://export-receipt.sociobot.in';
 const consoleErrors = [];
 const claims = JSON.parse(readFileSync('.factory/claims.json', 'utf8'));
 
@@ -22,9 +23,9 @@ async function freshPage(viewport = { width: 1280, height: 800 }) {
   page.on('console', (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); });
   return { context, page };
 }
-async function demo(page) {
-  await page.goto(`${baseURL}/demo`);
-  await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+async function demo(page, path = '/demo') {
+  await page.goto(`${baseURL}${path}`);
+  await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
 }
 async function downloadJson(page) {
   const downloadPromise = page.waitForEvent('download');
@@ -69,7 +70,7 @@ try {
     context.on('request', (request) => { if (new URL(request.url()).origin !== baseURL) external.push(request.url()); });
     await page.goto(baseURL);
     await page.locator('#archive').setInputFiles({ name: 'export.json', mimeType: 'application/json', buffer: Buffer.from('[{"created_at":"2025-01-08"}]') });
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+    await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
     if (external.length) throw new Error(`Archive flow made an external request: ${external.join(', ')}`);
     await context.close();
   }
@@ -114,7 +115,7 @@ try {
       const { context, page } = await freshPage();
       await page.goto(baseURL);
       await page.locator('#archive').setInputFiles(input);
-      await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+      await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
       await context.close();
     }
   }
@@ -139,14 +140,13 @@ try {
     await demo(page);
     await page.evaluate(async () => {
       await navigator.serviceWorker.ready;
-      await new Promise((resolve) => setTimeout(resolve, 150));
+      if (!navigator.serviceWorker.controller) await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      if (!registrations.some((registration) => registration.active)) throw new Error('The service worker did not activate after the first visit.');
     });
-    await page.reload();
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
-    await page.waitForTimeout(150);
     await context.setOffline(true);
     await page.reload();
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor({ timeout: 10_000 });
+    await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor({ timeout: 10_000 });
     await context.close();
   }
 
@@ -157,9 +157,9 @@ try {
     await page.goto(baseURL);
     if (await page.locator('input[type="password"], input[type="email"], form[action*="login"], form[action*="sign"]').count()) throw new Error('An account or credential control is present.');
     await page.locator('#archive').setInputFiles({ name: 'export.json', mimeType: 'application/json', buffer: Buffer.from('[{"created_at":"2025-01-08"}]') });
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+    await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
     await page.goto(`${baseURL}/demo`);
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+    await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
     const cookies = await context.cookies();
     const external = requests.filter((request) => new URL(request.url).origin !== baseURL);
     const apiTraffic = requests.filter((request) => request.method !== 'GET' || ['xhr', 'eventsource', 'websocket'].includes(request.type) || new URL(request.url).pathname.startsWith('/api/'));
@@ -184,18 +184,72 @@ try {
     const { context, page } = await freshPage();
     const requests = [];
     context.on('request', (request) => requests.push({ url: request.url(), type: request.resourceType(), method: request.method() }));
-    await demo(page);
+    await page.goto(baseURL);
+    await page.getByRole('button', { name: 'Use dark colors' }).click();
+    const realBeforeDemo = await browserStorage(page);
+    await demo(page, '/?demo=1');
+    if (new URL(page.url()).pathname !== '/demo') throw new Error('The documented ?demo=1 entry did not open the isolated demo.');
     requests.length = 0;
+    await page.getByRole('button', { name: 'Use light colors' }).click();
     await page.getByRole('button', { name: 'Reset demo' }).click();
-    await page.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+    await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
     const during = await browserStorage(page);
-    if (Object.keys(during.local).length || Object.keys(during.session).length || during.databases.length) throw new Error(`Demo wrote browser data: ${JSON.stringify(during)}`);
+    if (JSON.stringify(during) !== JSON.stringify(realBeforeDemo)) throw new Error(`Demo changed real browser data: ${JSON.stringify({ realBeforeDemo, during })}`);
     await page.getByRole('button', { name: 'Start for real' }).click();
     await page.locator('#archive').waitFor();
     if (new URL(page.url()).pathname !== '/' || await page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('Leaving the demo did not discard the sample workspace.');
     const after = await browserStorage(page);
     const demoTraffic = requests.filter((request) => request.method !== 'GET' || ['fetch', 'xhr', 'eventsource', 'websocket'].includes(request.type));
-    if (Object.keys(after.local).length || Object.keys(after.session).length || after.databases.length || demoTraffic.length) throw new Error(`Demo persisted data or made data requests: ${JSON.stringify({ after, demoTraffic })}`);
+    if (JSON.stringify(after) !== JSON.stringify(realBeforeDemo) || demoTraffic.length) throw new Error(`Demo persisted data or made data requests: ${JSON.stringify({ after, demoTraffic })}`);
+    await context.close();
+  }
+
+  if (selected('@claim:recognized-layouts')) {
+    const fixtures = [
+      { name: 'harbor.zip', entries: { 'account/messages.json': '[]', 'account/contacts.csv': 'name\nMara\n', 'account/profile.json': '{}', 'media/a.jpg': 'x' }, matched: 'Harbor Mail export' },
+      { name: 'takeout.zip', entries: { 'Takeout/My Activity/a.json': '[]', 'Takeout/Contacts/a.csv': 'name\nMara\n', 'Takeout/Google Photos/a.jpg': 'x' }, matched: 'Google Takeout' },
+      { name: 'meta.zip', entries: { 'profile_information/a.json': '{}', 'messages/a.json': '[]', 'photos_and_videos/a.jpg': 'x' }, matched: 'Meta download' },
+    ];
+    for (const fixture of fixtures) {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      await page.locator('#archive').setInputFiles({ name: fixture.name, mimeType: 'application/zip', buffer: Buffer.from(zipSync(Object.fromEntries(Object.entries(fixture.entries).map(([name, content]) => [name, new TextEncoder().encode(content)])))) });
+      await page.getByText(`Layout matched: ${fixture.matched}`).waitFor();
+      await context.close();
+    }
+    {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      await page.locator('#archive').setInputFiles({ name: 'missing-meta.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'profile_information/a.json': new TextEncoder().encode('{}'), 'messages/a.json': new TextEncoder().encode('[]') })) });
+      await page.getByText('Missing category: Photos and videos').waitFor();
+      await context.close();
+    }
+    {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      await page.locator('#archive').setInputFiles({ name: 'ambiguous.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'Takeout/My Activity/a.json': new TextEncoder().encode('[]'), 'messages/a.json': new TextEncoder().encode('[]') })) });
+      await page.getByText('Ambiguous export layout').first().waitFor();
+      await context.close();
+    }
+    {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      await page.locator('#archive').setInputFiles({ name: 'other.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync({ 'notes/a.json': new TextEncoder().encode('[]') })) });
+      await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
+      if (await page.getByText('Layout matched:').count()) throw new Error('A non-matching export was assigned a supported layout.');
+      await context.close();
+    }
+  }
+
+  if (selected('@claim:receipt-verification')) {
+    const { context, page } = await freshPage();
+    await demo(page);
+    const receipt = await downloadJson(page);
+    await page.locator('#verify-receipt').setInputFiles({ name: 'receipt.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(receipt)) });
+    await page.getByText('Valid signature. This receipt has not changed since this browser signed it.').waitFor();
+    receipt.name = 'tampered-export.zip';
+    await page.locator('#verify-receipt').setInputFiles({ name: 'tampered.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(receipt)) });
+    await page.getByText('Invalid signature. This receipt changed or is not a signed Export Receipt JSON file.').waitFor();
     await context.close();
   }
 
@@ -263,7 +317,7 @@ try {
     const { context: claimContext, page: claimPage } = await freshPage();
     for (const path of ['/', '/privacy', '/demo']) {
       await claimPage.goto(`${baseURL}${path}`);
-      if (path === '/demo') await claimPage.getByRole('heading', { name: 'Your archive at a glance' }).waitFor();
+      if (path === '/demo') await claimPage.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
       for (const value of await claimPage.locator('[data-claim]').evaluateAll((elements) => elements.map((element) => element.getAttribute('data-claim')))) {
         for (const id of value?.split(/\s+/) || []) annotatedClaims.add(id);
       }
@@ -273,13 +327,49 @@ try {
     if (unknownClaims.length || undocumentedClaims.length) throw new Error(`Visitor claim annotations and claims registry differ: ${JSON.stringify({ unknownClaims, undocumentedClaims })}`);
     await claimContext.close();
 
+    const routes = [
+      ['/', 'Export Receipt — Check your data export', '/', 'Check your export before access ends'],
+      ['/demo', 'Demo — Export Receipt', '/demo', 'Your export at a glance'],
+      ['/privacy', 'Privacy — Export Receipt', '/privacy', 'Your export stays on your device'],
+      ['/terms', 'Terms — Export Receipt', '/terms', 'Use Export Receipt at your own pace'],
+      ['/receipt', 'No receipt is open — Export Receipt', '/receipt', 'No receipt is open'],
+    ];
+    for (const [path, title, canonicalPath, heading] of routes) {
+      const { context, page } = await freshPage();
+      await page.goto(`${baseURL}${path}`);
+      await page.getByRole('heading', { name: heading }).waitFor();
+      const metadata = await page.evaluate(() => ({ title: document.title, canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'), description: document.querySelector('meta[name="description"]')?.getAttribute('content'), ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content'), twitterTitle: document.querySelector('meta[name="twitter:title"]')?.getAttribute('content') }));
+      if (metadata.title !== title || metadata.canonical !== `${canonicalOrigin}${canonicalPath}` || !metadata.description || metadata.ogTitle !== title || metadata.twitterTitle !== title) throw new Error(`Route metadata is incomplete for ${path}: ${JSON.stringify(metadata)}`);
+      await context.close();
+    }
+
+    const { context: mobileContext, page: mobilePage } = await freshPage({ width: 390, height: 844 });
+    await mobilePage.goto(baseURL);
+    const firstScreenBottom = await mobilePage.locator('.hero-actions,.facts').evaluateAll((items) => Math.max(...items.map((item) => item.getBoundingClientRect().bottom)));
+    if (firstScreenBottom > 844) throw new Error(`The mobile first-screen action outcome or facts are below the viewport (${firstScreenBottom}px).`);
+    await mobilePage.screenshot({ path: 'artifacts/mobile-first-screen.png', fullPage: false });
+    await mobileContext.close();
+
+    const { context: statusContext, page: statusPage } = await freshPage({ width: 390, height: 844 });
+    await statusPage.goto(`${baseURL}/404.html`);
+    await statusPage.getByRole('heading', { name: 'That page is not here' }).waitFor();
+    const statusViolations = (await new AxeBuilder({ page: statusPage }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
+    if (statusViolations.length || await statusPage.getByRole('navigation', { name: 'Primary' }).count() !== 1) throw new Error(`The 404 page is not accessible or lacks shared navigation: ${statusViolations.map((violation) => violation.id).join(', ')}`);
+    const statusTargets = await statusPage.locator('a').evaluateAll((items) => items.filter((item) => { const rect = item.getBoundingClientRect(); const style = getComputedStyle(item); return style.display !== 'none' && style.visibility !== 'hidden' && (rect.width < 44 || rect.height < 44); }).map((item) => item.textContent?.trim()));
+    if (statusTargets.length) throw new Error(`404 targets under 44px: ${statusTargets.join(', ')}`);
+    await statusPage.screenshot({ path: 'artifacts/404-local.png', fullPage: false });
+    await statusContext.close();
+
+    const staticConfig = JSON.parse(readFileSync('public/staticwebapp.config.json', 'utf8'));
+    if (staticConfig.responseOverrides?.['404']?.rewrite !== '/404.html') throw new Error('Static deployment does not route unknown URLs to the designed 404 page.');
+
     const { context: keyboardContext, page: keyboardPage } = await freshPage();
     await keyboardPage.goto(baseURL);
     if (await keyboardPage.evaluate(() => document.activeElement !== document.body)) throw new Error('Initial load moved focus away from the document start.');
     await keyboardPage.keyboard.press('Tab');
     if (await keyboardPage.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Skip to inspection') throw new Error('The skip link is not the first forward-Tab target.');
     await keyboardPage.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Privacy' }).click();
-    await keyboardPage.getByRole('heading', { name: 'Your archive stays on your device' }).waitFor();
+    await keyboardPage.getByRole('heading', { name: 'Your export stays on your device' }).waitFor();
     if (await keyboardPage.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('A client-side route change did not move focus to its heading.');
     await keyboardContext.close();
 

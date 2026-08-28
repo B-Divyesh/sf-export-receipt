@@ -42,7 +42,9 @@ export const inspectors: ExportInspector[] = [
   },
 ];
 
-export function inspectCategories(paths: string[]): { name?: string; checks: CategoryCheck[] } {
-  const inspector = inspectors.find((candidate) => candidate.matches(paths));
+export function inspectCategories(paths: string[]): { name?: string; checks: CategoryCheck[]; ambiguous?: string[] } {
+  const matches = inspectors.filter((candidate) => candidate.matches(paths));
+  if (matches.length > 1) return { name: 'Ambiguous export layout', checks: [], ambiguous: matches.map((candidate) => candidate.name) };
+  const inspector = matches[0];
   return inspector ? { name: inspector.name, checks: inspector.inspect(paths) } : { checks: [] };
 }

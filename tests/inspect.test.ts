@@ -33,6 +33,12 @@ describe('archive inspection regressions', () => {
     expect(inspection.findings.some((finding) => finding.title === 'Missing category: Profile')).toBe(true);
   });
 
+  it('marks overlapping supported layouts as ambiguous instead of guessing', () => {
+    const inspection = analyzeEntries('mixed.zip', 20, { 'Takeout/My Activity/activity.json': new TextEncoder().encode('[]'), 'messages/inbox.json': new TextEncoder().encode('[]') }, 'file', 'abc');
+    expect(inspection.inspector).toBe('Ambiguous export layout');
+    expect(inspection.findings.some((finding) => finding.title === 'Ambiguous export layout')).toBe(true);
+  });
+
   it('rejects a ZIP whose central directory advertises a hostile expanded size before decompression', () => {
     const archive = zipSync({ 'small.txt': new TextEncoder().encode('ok') });
     const signature = [0x50, 0x4b, 0x01, 0x02];

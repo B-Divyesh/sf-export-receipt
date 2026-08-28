@@ -76,17 +76,18 @@ export function analyzeEntries(name: string, bytes: number, raw: Record<string, 
     const entry: FileEntry = { path, bytes: data.byteLength, kind, records: recordCount, dates: text === undefined ? [] : datesIn(text), readable };
     files.push(entry);
     if ((kind === 'JSON' || kind === 'CSV') && text === undefined) findings.push({ level: 'danger', title: `Data file too large: ${path}`, detail: `This file is larger than the ${MAX_TEXT_BYTES / 1024 / 1024} MB safe parsing limit. Split or filter it, then inspect each part.` });
-    else if ((kind === 'JSON' || kind === 'CSV') && recordCount === undefined) findings.push({ level: 'danger', title: `Unreadable ${kind}: ${path}`, detail: 'This file could not be parsed. Export it again or keep the original archive with this receipt.' });
-    if (path.split('/').some((part) => part === '..' || part === '')) findings.push({ level: 'danger', title: `Unsafe path: ${path}`, detail: 'This archive contains a path that should not be extracted automatically.' });
+    else if ((kind === 'JSON' || kind === 'CSV') && recordCount === undefined) findings.push({ level: 'danger', title: `Unreadable ${kind}: ${path}`, detail: 'This file could not be parsed. Export it again or keep the original export with this receipt.' });
+    if (path.split('/').some((part) => part === '..' || part === '')) findings.push({ level: 'danger', title: `Unsafe path: ${path}`, detail: 'This export contains a path that should not be extracted automatically.' });
   }
   const readable = files.filter((file) => file.readable);
   const attachments = files.filter((file) => file.kind === 'attachment');
   const allDates = readable.flatMap((file) => file.dates || []).sort();
   const categories = inspectCategories(files.map((file) => file.path));
-  if (!readable.length) findings.push({ level: 'warn', title: 'No readable data tables found', detail: 'The archive may use a format Export Receipt does not yet understand.' });
+  if (!readable.length) findings.push({ level: 'warn', title: 'No readable data tables found', detail: 'The export may use a format Export Receipt does not yet understand.' });
   if (!attachments.length) findings.push({ level: 'warn', title: 'No attachments found', detail: 'Check whether images, documents, or media should be included in this export.' });
-  if (!allDates.length) findings.push({ level: 'warn', title: 'No valid dates found in readable files', detail: 'You cannot confirm date coverage from this archive yet.' });
+  if (!allDates.length) findings.push({ level: 'warn', title: 'No valid dates found in readable files', detail: 'You cannot confirm date coverage from this export yet.' });
   if (allDates.length) findings.push({ level: 'ok', title: `Date coverage: ${allDates[0]} to ${allDates.at(-1)}`, detail: `Found dates across ${new Set(allDates).size} valid calendar days in readable files.` });
+  if (categories.ambiguous) findings.push({ level: 'warn', title: 'Ambiguous export layout', detail: `This export matches ${categories.ambiguous.join(' and ')}. Check the categories manually before relying on a missing-category result.` });
   for (const category of categories.checks.filter((item) => item.status !== 'present')) findings.push({ level: 'warn', title: `Missing category: ${category.label}`, detail: category.detail });
   findings.unshift({ level: 'info', title: `${files.length} files inventoried`, detail: `${readable.length} successfully parsed JSON or CSV files; ${attachments.length} attachments.` });
   return { name, bytes, files: files.sort((a, b) => a.path.localeCompare(b.path)), findings, hash, inspectedAt: new Date().toISOString(), source, inspector: categories.name, categoryChecks: categories.checks };
