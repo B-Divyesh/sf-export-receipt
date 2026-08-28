@@ -1,0 +1,49 @@
+{
+  "baseURL": "http://127.0.0.1:4173",
+  "checkedAt": "2026-08-28T22:52:46.247Z",
+  "passed": true,
+  "checks": [
+    {
+      "name": "cold first screen",
+      "detail": "599px bottom"
+    },
+    {
+      "name": "demo Back and Home",
+      "detail": "both return to / and discard the banner"
+    },
+    {
+      "name": "query demo and isolation",
+      "detail": "real storage unchanged; no external, API, credential, or non-GET traffic"
+    },
+    {
+      "name": "receipt outputs",
+      "detail": "exact shipped-ZIP digest; truthful bundled-signature checks including replacement-key re-signing"
+    },
+    {
+      "name": "routes, metadata, legal, mobile, axe",
+      "detail": "5 SPA routes passed direct cold checks"
+    },
+    {
+      "name": "sitemap, 404, headers",
+      "detail": "all routes listed; unknown URL is styled HTTP 404; CSP/nosniff/referrer policy present"
+    },
+    {
+      "name": "controlled-PWA 404",
+      "detail": "unknown navigation returned the designed HTTP 404 after service-worker activation"
+    },
+    {
+      "name": "offline after one visit",
+      "detail": "complete four-file sample reloaded offline"
+    },
+    {
+      "name": "reduced motion",
+      "detail": "1e-05s"
+    }
+  ],
+  "consoleErrors": [],
+  "expected404Console": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "failures": []
+}
