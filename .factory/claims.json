@@ -1,0 +1,6 @@
+[
+  {"id":"sample-inventory","claim":"The sample receipt shows files, attachments, and date coverage.","where":"demo receipt","test":"npm test -- --grep @claim:sample-inventory","sandbox":"shipped demo archive; inspect its observable inventory and date finding"},
+  {"id":"local-only","claim":"Archive inspection runs in your browser and does not upload archives.","where":"landing facts and file picker","test":"npm test -- --grep @claim:local-only","sandbox":"run the inspection on shipped sample bytes with fetch intercepted"},
+  {"id":"json-receipt","claim":"Download a JSON receipt with next checks.","where":"receipt action and How it works","test":"npm test -- --grep @claim:json-receipt","sandbox":"shipped demo inspection; assert receipt JSON and checklist"},
+  {"id":"offline-reload","claim":"Works offline after the first visit.","where":"landing fact","test":"npm test -- --grep @claim:offline-reload","sandbox":"service worker shell cache includes the landing document and offline fallback"}
+]
