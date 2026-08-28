@@ -1,1 +1,1 @@
-Check a data export before access ends, then keep a local receipt of files, dates, missing categories, and warnings.
+Check a service export before access ends, then save a local receipt of files, dates, gaps, and warnings.

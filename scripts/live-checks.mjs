@@ -1,10 +1,15 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
 
 const baseURL = (process.argv[2] || 'https://export-receipt.sociobot.in').replace(/\/$/, '');
 const evidenceDir = process.argv[3] || 'artifacts/live';
 const origin = new URL(baseURL).origin;
+const sampleBase64 = readFileSync('src/sample-export.ts', 'utf8').match(/SAMPLE_EXPORT_BASE64 = '([^']+)'/)?.[1];
+if (!sampleBase64) throw new Error('The shipped sample ZIP bytes are missing.');
+const sampleZip = Buffer.from(sampleBase64, 'base64');
+const sampleHash = createHash('sha256').update(sampleZip).digest('hex');
 mkdirSync(evidenceDir, { recursive: true });
 
 const failures = [];
@@ -51,10 +56,13 @@ try {
   assert(rootResponse?.status() === 200, `Cold root returned ${rootResponse?.status()}.`);
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
   assert(await root.page.evaluate(() => document.activeElement === document.body), 'Cold load moved focus away from the document start.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-3-root-mobile.png`, fullPage: false });
+  await root.page.getByText('Your export stays on this device').waitFor();
+  await root.page.getByText('Works offline after first visit').waitFor();
+  await root.page.getByText('Free to use · no account needed').waitFor();
+  await root.page.screenshot({ path: `${evidenceDir}/polish-4-root-mobile.png`, fullPage: false });
   await root.page.keyboard.press('Tab');
-  assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Skip to inspection', 'Skip link is not the first Tab target.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-3-focus-mobile.png`, fullPage: false });
+  assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Skip to main content', 'Skip link is not the first Tab target.');
+  await root.page.screenshot({ path: `${evidenceDir}/polish-4-focus-mobile.png`, fullPage: false });
   const firstScreenBottom = await root.page.locator('.hero-actions,.facts').evaluateAll((items) => Math.max(...items.map((item) => item.getBoundingClientRect().bottom)));
   assert(firstScreenBottom <= 844, `First-screen facts end at ${firstScreenBottom}px.`);
   for (const name of ['Demo', 'Privacy']) {
@@ -72,12 +80,14 @@ try {
   await root.page.getByText('Date coverage: 2022-02-19 to 2025-01-08').waitFor();
   await root.page.getByText('Missing category: Profile').waitFor();
   assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Your export at a glance', 'Demo route did not focus its h1.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-3-demo-mobile.png`, fullPage: true });
+  assert(await root.page.locator('[data-full-hash]').textContent() === sampleHash, 'Live demo digest does not equal SHA-256 over the shipped ZIP.');
+  assert((await root.page.locator('.source-hash summary').textContent())?.startsWith(`${sampleZip.byteLength} B`), 'Live demo byte count does not describe the shipped ZIP.');
+  await root.page.screenshot({ path: `${evidenceDir}/polish-4-demo-mobile.png`, fullPage: true });
   await root.page.goBack();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
   assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('complementary', { name: 'Demo controls' }).count() === 0, 'Back remained trapped in demo mode.');
   assert(await root.page.evaluate(() => document.activeElement?.tagName) === 'H1', 'Back did not focus the landing h1.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-3-demo-back-mobile.png`, fullPage: false });
+  await root.page.screenshot({ path: `${evidenceDir}/polish-4-demo-back-mobile.png`, fullPage: false });
   await demo(root.page);
   await root.page.getByRole('link', { name: 'EXPORT RECEIPT' }).click();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
@@ -111,20 +121,32 @@ try {
   const htmlPromise = receipts.page.waitForEvent('download');
   await receipts.page.getByRole('button', { name: 'Download HTML receipt' }).click();
   const html = (await readDownload(await htmlPromise)).toString('utf8');
-  assert(['Export: harbor-mail-export.zip', 'SHA-256:', 'Missing category: Profile', 'Retest checklist'].every((value) => html.includes(value)), 'HTML receipt is missing promised evidence.');
+  assert(['Export: harbor-mail-export.zip', `SHA-256: ${sampleHash}`, 'Missing category: Profile', 'Retest checklist'].every((value) => html.includes(value)), 'HTML receipt is missing promised evidence or the exact shipped-ZIP digest.');
   assert(!/Signed by:|<p>Signature:/.test(html), 'HTML receipt still implies it is signed.');
   const jsonPromise = receipts.page.waitForEvent('download');
   await receipts.page.getByRole('button', { name: 'Download signed JSON receipt' }).click();
   const jsonBuffer = await readDownload(await jsonPromise);
   const signed = JSON.parse(jsonBuffer.toString('utf8'));
+  assert(signed.hash === sampleHash && signed.bytes === sampleZip.byteLength, 'JSON receipt does not describe the exact shipped ZIP.');
   await receipts.page.locator('#verify-receipt').setInputFiles({ name: 'receipt.json', mimeType: 'application/json', buffer: jsonBuffer });
-  await receipts.page.getByText('Valid signature. This receipt has not changed since this browser signed it.').waitFor();
+  await receipts.page.getByText('Bundled signature matches this receipt. This does not identify who signed it.').waitFor();
   signed.name = 'tampered.zip';
   await receipts.page.locator('#verify-receipt').setInputFiles({ name: 'tampered.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(signed)) });
-  await receipts.page.getByText('Invalid signature. This receipt changed or is not a signed Export Receipt JSON file.').waitFor();
+  await receipts.page.getByText('Bundled signature does not match this receipt, or this is not a signed Export Receipt JSON file.').waitFor();
+  const resigned = await receipts.page.evaluate(async (receipt) => {
+    const { signature: oldSignature, ...payload } = receipt;
+    payload.name = 'edited-and-resigned.zip';
+    const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+    const value = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, pair.privateKey, new TextEncoder().encode(JSON.stringify(payload)));
+    const base64 = btoa(String.fromCharCode(...new Uint8Array(value))).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+    return { ...payload, signature: { ...oldSignature, publicKeyJwk: await crypto.subtle.exportKey('jwk', pair.publicKey), value: base64 } };
+  }, signed);
+  await receipts.page.locator('#verify-receipt').setInputFiles({ name: 'edited-and-resigned.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(resigned)) });
+  await receipts.page.getByText('Bundled signature matches this receipt. This does not identify who signed it.').waitFor();
+  assert(!/has not changed|this browser signed/i.test(await receipts.page.locator('#verification-result').textContent() || ''), 'Replacement-key receipt was falsely described as unchanged or from this browser.');
   await receipts.page.locator('.checklist').scrollIntoViewIfNeeded();
-  await receipts.page.screenshot({ path: `${evidenceDir}/polish-3-receipt-actions-mobile.png`, fullPage: false });
-  record('receipt outputs', 'plain HTML evidence; signed JSON valid/tampered verification');
+  await receipts.page.screenshot({ path: `${evidenceDir}/polish-4-receipt-actions-mobile.png`, fullPage: false });
+  record('receipt outputs', 'exact shipped-ZIP digest; truthful bundled-signature checks including replacement-key re-signing');
   await receipts.context.close();
 
   const routes = [
@@ -146,13 +168,15 @@ try {
     assert(!violations.length, `${route.path} axe violations: ${violations.map((violation) => violation.id).join(', ')}`);
     const geometry = await view.page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
     assert(geometry.viewport === geometry.content, `${route.path} overflows at 390px: ${JSON.stringify(geometry)}`);
+    const skip = view.page.getByRole('link', { name: 'Skip to main content' });
+    assert(await skip.count() === 1 && await skip.getAttribute('href') === '#main', `${route.path} skip link is inconsistent.`);
     if (route.path === '/privacy') {
       const contact = view.page.getByRole('link', { name: 'Ask a question in the Export Receipt repository (opens in a new tab)' });
       assert(await contact.getAttribute('href') === 'https://github.com/B-Divyesh/sf-export-receipt/issues', 'Privacy contact destination is missing.');
-      await view.page.screenshot({ path: `${evidenceDir}/polish-3-privacy-mobile.png`, fullPage: true });
+      await view.page.screenshot({ path: `${evidenceDir}/polish-4-privacy-mobile.png`, fullPage: true });
     }
-    if (route.path === '/terms') await view.page.screenshot({ path: `${evidenceDir}/polish-3-terms-mobile.png`, fullPage: true });
-    if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-3-receipt-empty-mobile.png`, fullPage: true });
+    if (route.path === '/terms') await view.page.screenshot({ path: `${evidenceDir}/polish-4-terms-mobile.png`, fullPage: true });
+    if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-4-receipt-empty-mobile.png`, fullPage: true });
     await view.context.close();
   }
   record('routes, metadata, legal, mobile, axe', `${routes.length} SPA routes passed direct cold checks`);
@@ -165,9 +189,10 @@ try {
   assert(missingResponse?.status() === 404, `Unknown route returned ${missingResponse?.status()}.`);
   await staticCheck.page.getByRole('heading', { name: 'That page is not here' }).waitFor();
   assert(await staticCheck.page.getByRole('navigation', { name: 'Primary' }).count() === 1, '404 lacks shared navigation.');
+  assert(await staticCheck.page.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') === '#main', '404 skip link is inconsistent.');
   const missingViolations = (await new AxeBuilder({ page: staticCheck.page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
   assert(!missingViolations.length, `404 axe violations: ${missingViolations.map((violation) => violation.id).join(', ')}`);
-  await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-3-404-mobile.png`, fullPage: true });
+  await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-4-404-mobile.png`, fullPage: true });
   const headers = Object.fromEntries(Object.entries(rootResponse?.headers() || {}).map(([key, value]) => [key.toLowerCase(), value]));
   assert(headers['content-security-policy']?.includes("default-src 'self'") && headers['x-content-type-options'] === 'nosniff' && headers['referrer-policy'] === 'strict-origin-when-cross-origin', `Security headers are incomplete: ${JSON.stringify(headers)}`);
   record('sitemap, 404, headers', 'all routes listed; unknown URL is styled HTTP 404; CSP/nosniff/referrer policy present');
@@ -203,6 +228,6 @@ try {
 }
 
 const result = { baseURL, checkedAt: new Date().toISOString(), passed: failures.length === 0, checks, consoleErrors: consoleErrors.filter((message) => !isExpected404Console(message)), expected404Console: consoleErrors.filter(isExpected404Console), failures };
-writeFileSync(`${evidenceDir}/polish-3-verify.json`, `${JSON.stringify(result, null, 2)}\n`);
+writeFileSync(`${evidenceDir}/polish-4-verify.json`, `${JSON.stringify(result, null, 2)}\n`);
 console.log(JSON.stringify(result, null, 2));
 if (failures.length) process.exit(1);

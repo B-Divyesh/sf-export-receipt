@@ -1,5 +1,6 @@
 import type { FileEntry, Finding, Inspection } from './types';
 import { inspectCategories } from './inspectors';
+import { SAMPLE_EXPORT_NAME, sampleExportBytes } from './sample-export';
 
 const DATE = /\b(20\d{2}[-/]\d{2}[-/]\d{2})(?:[T\s][0-2]\d:[0-5]\d(?::[0-5]\d)?(?:\.\d+)?(?:Z|[+-]\d\d:?\d\d)?)?\b/g;
 const attachmentExtensions = /\.(jpg|jpeg|png|gif|webp|pdf|mp3|mp4|mov|wav|zip)$/i;
@@ -111,7 +112,7 @@ export function preflightZip(bytes: Uint8Array): ZipPreflight {
     entries += 1;
     compressedBytes += compressed;
     expandedBytes += expanded;
-    if (entries > MAX_ZIP_ENTRIES || expandedBytes > MAX_ZIP_EXPANDED_BYTES || (compressedBytes > 0 && expandedBytes / compressedBytes > MAX_ZIP_RATIO)) throw new Error('This ZIP exceeds safe inspection limits. Choose an export with fewer than 1,000 files and less than 50 MB expanded data.');
+    if (entries > MAX_ZIP_ENTRIES || expandedBytes > MAX_ZIP_EXPANDED_BYTES || (compressedBytes > 0 && expandedBytes / compressedBytes > MAX_ZIP_RATIO)) throw new Error('This ZIP exceeds safe inspection limits. Choose an export with at most 1,000 entries and at most 50 MB of expanded data.');
     offset += 45 + filenameLength + extraLength + commentLength;
   }
   if (!entries) throw new Error('This ZIP has no readable central directory. Choose a standard, non-encrypted ZIP export.');
@@ -146,11 +147,9 @@ export async function inspectFile(file: File): Promise<Inspection> {
 }
 
 export async function sampleInspection(): Promise<Inspection> {
-  const messages = JSON.stringify([{ sent_at: '2023-05-14T09:10:00Z', body: 'Travel photo notes' }, { sent_at: '2024-11-30T17:21:00Z', body: 'Account export requested' }, { sent_at: '2025-01-08T12:00:00Z', body: 'Final message' }]);
-  const contacts = 'name,email,created_at\nMara Singh,mara@example.test,2022-02-19\nKai Ivers,kai@example.test,2024-09-08\n';
-  const raw = { 'account/messages.json': new TextEncoder().encode(messages), 'account/contacts.csv': new TextEncoder().encode(contacts), 'media/receipt-photo.jpg': new Uint8Array(812), 'README.txt': new TextEncoder().encode('Sample service export') };
-  const stable = new TextEncoder().encode(messages + contacts).buffer;
-  return analyzeEntries('harbor-mail-export.zip', 25_184, raw, 'sample', await sha256(stable));
+  const file = new File([sampleExportBytes()], SAMPLE_EXPORT_NAME, { type: 'application/zip' });
+  const inspection = await inspectFile(file);
+  return { ...inspection, source: 'sample' };
 }
 
 export function receiptPayload(inspection: Inspection) {

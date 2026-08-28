@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 import AxeBuilder from '@axe-core/playwright';
@@ -11,6 +12,10 @@ const baseURL = 'http://127.0.0.1:4173';
 const canonicalOrigin = 'https://export-receipt.sociobot.in';
 const consoleErrors = [];
 const claims = JSON.parse(readFileSync('.factory/claims.json', 'utf8'));
+const sampleBase64 = readFileSync('src/sample-export.ts', 'utf8').match(/SAMPLE_EXPORT_BASE64 = '([^']+)'/)?.[1];
+if (!sampleBase64) throw new Error('The shipped sample ZIP bytes are missing.');
+const sampleZip = Buffer.from(sampleBase64, 'base64');
+const sampleHash = createHash('sha256').update(sampleZip).digest('hex');
 
 execFileSync('npm', ['run', 'build'], { stdio: 'inherit' });
 const server = await preview({ preview: { host: '127.0.0.1', port: 4173, strictPort: true } });
@@ -106,7 +111,7 @@ try {
     const stream = await download.createReadStream();
     let output = '';
     for await (const chunk of stream) output += chunk;
-    const expected = ['Export: harbor-mail-export.zip', 'SHA-256:', 'Missing category: Profile', 'Retest checklist', 'Use the signed JSON receipt when you need to check for changes.'];
+    const expected = ['Export: harbor-mail-export.zip', `SHA-256: ${sampleHash}`, 'Missing category: Profile', 'Retest checklist', 'Use the signed JSON receipt to check its bundled signature.'];
     if (!expected.every((value) => output.includes(value)) || /Signed by:|<p>Signature:/.test(output)) throw new Error('Downloaded HTML receipt does not contain the promised plain receipt evidence.');
     await context.close();
   }
@@ -130,7 +135,9 @@ try {
   if (selected('@claim:source-hash')) {
     const { context, page } = await freshPage();
     await demo(page);
-    await page.getByText(/SHA-256 [a-f0-9]{12}/).waitFor();
+    if (await page.locator('[data-full-hash]').textContent() !== sampleHash) throw new Error('The visible demo digest does not equal SHA-256 over the shipped ZIP bytes.');
+    const receipt = await downloadJson(page);
+    if (receipt.hash !== sampleHash || receipt.bytes !== sampleZip.byteLength) throw new Error('The JSON receipt digest or byte count does not describe the shipped ZIP bytes.');
     await context.close();
   }
 
@@ -162,7 +169,8 @@ try {
     const requests = [];
     context.on('request', (request) => requests.push({ url: request.url(), type: request.resourceType(), method: request.method() }));
     await page.goto(baseURL);
-    if (await page.locator('input[type="password"], input[type="email"], form[action*="login"], form[action*="sign"]').count()) throw new Error('An account or credential control is present.');
+    await page.getByText('Free to use · no account needed').waitFor();
+    if (await page.locator('input[type="password"], input[type="email"], form[action*="login"], form[action*="sign"], [data-payment], a[href*="checkout"], a[href*="billing"]').count()) throw new Error('An account, payment, or credential control is present.');
     await page.locator('#archive').setInputFiles({ name: 'export.json', mimeType: 'application/json', buffer: Buffer.from('[{"created_at":"2025-01-08"}]') });
     await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
     await page.goto(`${baseURL}/demo`);
@@ -170,7 +178,7 @@ try {
     const cookies = await context.cookies();
     const external = requests.filter((request) => new URL(request.url).origin !== baseURL);
     const apiTraffic = requests.filter((request) => request.method !== 'GET' || ['xhr', 'eventsource', 'websocket'].includes(request.type) || new URL(request.url).pathname.startsWith('/api/'));
-    if (cookies.length || external.length || apiTraffic.length) throw new Error(`Account-free flow used cookies, external traffic, or an API: ${JSON.stringify({ cookies, external, apiTraffic })}`);
+    if (cookies.length || external.length || apiTraffic.length) throw new Error(`Free account-free flow used cookies, external traffic, or an API: ${JSON.stringify({ cookies, external, apiTraffic })}`);
     await context.close();
   }
 
@@ -277,14 +285,51 @@ try {
     await demo(page);
     const receipt = await downloadJson(page);
     await page.locator('#verify-receipt').setInputFiles({ name: 'receipt.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(receipt)) });
-    await page.getByText('Valid signature. This receipt has not changed since this browser signed it.').waitFor();
+    await page.getByText('Bundled signature matches this receipt. This does not identify who signed it.').waitFor();
     receipt.name = 'tampered-export.zip';
     await page.locator('#verify-receipt').setInputFiles({ name: 'tampered.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(receipt)) });
-    await page.getByText('Invalid signature. This receipt changed or is not a signed Export Receipt JSON file.').waitFor();
+    await page.getByText('Bundled signature does not match this receipt, or this is not a signed Export Receipt JSON file.').waitFor();
+    const resigned = await page.evaluate(async (signed) => {
+      const { signature: oldSignature, ...payload } = signed;
+      payload.name = 'edited-and-resigned.zip';
+      const pair = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+      const value = await crypto.subtle.sign({ name: 'ECDSA', hash: 'SHA-256' }, pair.privateKey, new TextEncoder().encode(JSON.stringify(payload)));
+      const base64 = btoa(String.fromCharCode(...new Uint8Array(value))).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+      return { ...payload, signature: { ...oldSignature, publicKeyJwk: await crypto.subtle.exportKey('jwk', pair.publicKey), value: base64 } };
+    }, receipt);
+    await page.locator('#verify-receipt').setInputFiles({ name: 'edited-and-resigned.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify(resigned)) });
+    await page.getByText('Bundled signature matches this receipt. This does not identify who signed it.').waitFor();
+    await page.getByText('This cannot prove who created it or detect editing followed by re-signing.').waitFor();
+    const result = await page.locator('#verification-result').textContent();
+    if (/has not changed|this browser signed/i.test(result || '')) throw new Error('Replacement-key receipt was falsely reported as unchanged or signed by this browser.');
     await context.close();
   }
 
   if (selected('@claim:safe-archive-limits')) {
+    {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      const entries = Object.fromEntries(Array.from({ length: 1000 }, (_, index) => [`entry-${index}.txt`, new Uint8Array()]));
+      await page.locator('#archive').setInputFiles({ name: 'exactly-1000.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync(entries)) });
+      await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
+      await page.getByText('1000 files inventoried').waitFor();
+      await context.close();
+    }
+    {
+      const { context, page } = await freshPage();
+      await page.goto(baseURL);
+      const boundary = new Uint8Array(50 * 1024 * 1024);
+      let state = 0x12345678;
+      for (let index = 0; index < 700 * 1024; index += 1) {
+        state ^= state << 13; state ^= state >>> 17; state ^= state << 5;
+        boundary[index] = state & 255;
+      }
+      const archive = zipSync({ 'boundary.bin': boundary }, { level: 6 });
+      await page.locator('#archive').setInputFiles({ name: 'exactly-50mb-expanded.zip', mimeType: 'application/zip', buffer: Buffer.from(archive) });
+      await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
+      await page.getByText('1 files inventoried').waitFor();
+      await context.close();
+    }
     {
       const { context, page } = await freshPage();
       await page.goto(baseURL);
@@ -305,7 +350,7 @@ try {
       await page.goto(baseURL);
       const entries = Object.fromEntries(Array.from({ length: 1001 }, (_, index) => [`entry-${index}.txt`, new Uint8Array()]));
       await page.locator('#archive').setInputFiles({ name: 'too-many.zip', mimeType: 'application/zip', buffer: Buffer.from(zipSync(entries)) });
-      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with fewer than 1,000 files and less than 50 MB expanded data.').waitFor();
+      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with at most 1,000 entries and at most 50 MB of expanded data.').waitFor();
       await context.close();
     }
     {
@@ -316,7 +361,7 @@ try {
       const offset = expanded.findIndex((_, index) => signature.every((value, part) => expanded[index + part] === value));
       new DataView(expanded.buffer, expanded.byteOffset, expanded.byteLength).setUint32(offset + 24, 50 * 1024 * 1024 + 1, true);
       await page.locator('#archive').setInputFiles({ name: 'expanded.zip', mimeType: 'application/zip', buffer: Buffer.from(expanded) });
-      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with fewer than 1,000 files and less than 50 MB expanded data.').waitFor();
+      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with at most 1,000 entries and at most 50 MB of expanded data.').waitFor();
       await context.close();
     }
     {
@@ -324,7 +369,7 @@ try {
       await page.goto(baseURL);
       const highRatio = zipSync({ 'zeros.txt': new Uint8Array(1024 * 1024) }, { level: 9 });
       await page.locator('#archive').setInputFiles({ name: 'high-ratio.zip', mimeType: 'application/zip', buffer: Buffer.from(highRatio) });
-      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with fewer than 1,000 files and less than 50 MB expanded data.').waitFor();
+      await page.getByText('This ZIP exceeds safe inspection limits. Choose an export with at most 1,000 entries and at most 50 MB of expanded data.').waitFor();
       await context.close();
     }
     {
@@ -375,6 +420,8 @@ try {
       const routeViolations = (await new AxeBuilder({ page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
       const routeGeometry = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
       if (routeViolations.length || routeGeometry.content !== routeGeometry.viewport) throw new Error(`Route accessibility or mobile overflow failed for ${path}: ${JSON.stringify({ routeViolations: routeViolations.map((violation) => violation.id), routeGeometry })}`);
+      const skip = page.getByRole('link', { name: 'Skip to main content' });
+      if (await skip.count() !== 1 || await skip.getAttribute('href') !== '#main') throw new Error(`Route ${path} does not use the common skip-link name and target.`);
       await context.close();
     }
 
@@ -393,6 +440,9 @@ try {
     await mobilePage.getByText('For people leaving a service, see what your export contains before an account disappears.').waitFor();
     await mobilePage.getByRole('button', { name: 'Try it with sample data' }).waitFor();
     await mobilePage.getByText('Loads a sample receipt now.').waitFor();
+    await mobilePage.getByText('Your export stays on this device').waitFor();
+    await mobilePage.getByText('Works offline after first visit').waitFor();
+    await mobilePage.getByText('Free to use · no account needed').waitFor();
     const landingCopy = await mobilePage.locator('main h1, main h2, main p, main figcaption, main .steps span, main .facts li, main button').allTextContents();
     const bannedCopy = /\b(leverage|seamless|effortless|robust|powerful|intuitive|reimagine|supercharge|unlock|delightful|journey|ecosystem|AI-powered)\b/i;
     const longSentences = landingCopy.flatMap((copy) => copy.split(/(?<=[.!?])\s+/)).map((copy) => copy.trim()).filter(Boolean).filter((copy) => copy.split(/\s+/).length > 22);
@@ -435,6 +485,7 @@ try {
     if (JSON.stringify(statusMetadata) !== JSON.stringify({ title: 'Page not found — Export Receipt', description: 'This Export Receipt page is not available.', canonical: `${canonicalOrigin}/404`, ogTitle: 'Page not found — Export Receipt', ogDescription: 'This Export Receipt page is not available.', ogUrl: `${canonicalOrigin}/404`, twitterTitle: 'Page not found — Export Receipt', twitterDescription: 'This Export Receipt page is not available.' })) throw new Error(`The 404 metadata is incomplete: ${JSON.stringify(statusMetadata)}`);
     const statusViolations = (await new AxeBuilder({ page: statusPage }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
     if (statusViolations.length || await statusPage.getByRole('navigation', { name: 'Primary' }).count() !== 1) throw new Error(`The 404 page is not accessible or lacks shared navigation: ${statusViolations.map((violation) => violation.id).join(', ')}`);
+    if (await statusPage.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') !== '#main') throw new Error('The 404 does not use the common skip-link name and target.');
     const statusTargets = await statusPage.locator('a').evaluateAll((items) => items.filter((item) => { const rect = item.getBoundingClientRect(); const style = getComputedStyle(item); return style.display !== 'none' && style.visibility !== 'hidden' && (rect.width < 44 || rect.height < 44); }).map((item) => item.textContent?.trim()));
     if (statusTargets.length) throw new Error(`404 targets under 44px: ${statusTargets.join(', ')}`);
     await statusPage.screenshot({ path: 'artifacts/404-local.png', fullPage: false });
@@ -447,7 +498,7 @@ try {
     await keyboardPage.goto(baseURL);
     if (await keyboardPage.evaluate(() => document.activeElement !== document.body)) throw new Error('Initial load moved focus away from the document start.');
     await keyboardPage.keyboard.press('Tab');
-    if (await keyboardPage.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Skip to inspection') throw new Error('The skip link is not the first forward-Tab target.');
+    if (await keyboardPage.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Skip to main content') throw new Error('The skip link is not the first forward-Tab target.');
     await keyboardPage.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name: 'Privacy' }).click();
     await keyboardPage.getByRole('heading', { name: 'Your export stays on your device' }).waitFor();
     if (await keyboardPage.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('A client-side route change did not move focus to its heading.');

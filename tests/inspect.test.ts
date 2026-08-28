@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { analyzeEntries, countCsvRecords, datesIn, MAX_ZIP_EXPANDED_BYTES, preflightZip, receiptPayload } from '../src/inspect';
+import { analyzeEntries, countCsvRecords, datesIn, MAX_ZIP_ENTRIES, MAX_ZIP_EXPANDED_BYTES, preflightZip, receiptPayload } from '../src/inspect';
 import { zipSync } from 'fflate';
 
 describe('archive inspection regressions', () => {
@@ -45,6 +45,19 @@ describe('archive inspection regressions', () => {
     const offset = archive.findIndex((_, index) => signature.every((value, part) => archive[index + part] === value));
     new DataView(archive.buffer).setUint32(offset + 24, MAX_ZIP_EXPANDED_BYTES + 1, true);
     expect(() => preflightZip(archive)).toThrow('safe inspection limits');
+  });
+
+  it('accepts the documented ZIP entry and expanded-size boundaries', () => {
+    const entries = Object.fromEntries(Array.from({ length: MAX_ZIP_ENTRIES }, (_, index) => [`entry-${index}.txt`, new Uint8Array()]));
+    expect(preflightZip(zipSync(entries)).entries).toBe(MAX_ZIP_ENTRIES);
+
+    const archive = zipSync({ 'boundary.bin': new Uint8Array(700 * 1024) }, { level: 0 });
+    const signature = [0x50, 0x4b, 0x01, 0x02];
+    const offset = archive.findIndex((_, index) => signature.every((value, part) => archive[index + part] === value));
+    const view = new DataView(archive.buffer, archive.byteOffset + offset, 46);
+    view.setUint32(20, MAX_ZIP_EXPANDED_BYTES, true);
+    view.setUint32(24, MAX_ZIP_EXPANDED_BYTES, true);
+    expect(preflightZip(archive).expandedBytes).toBe(MAX_ZIP_EXPANDED_BYTES);
   });
 
   it('keeps receipt payloads portable with category checks and a retest checklist', () => {

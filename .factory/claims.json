@@ -25,7 +25,7 @@
     "claim": "Download an HTML receipt with the source hash, findings, and next checks.",
     "where": "receipt action and How it works",
     "test": "npm test -- --grep @claim:html-receipt",
-    "sandbox": "fresh browser /demo click downloads HTML and observes the sample name, full source hash, findings, and retest checklist"
+    "sandbox": "fresh browser /demo click downloads HTML; recompute SHA-256 over the shipped ZIP and compare its full digest, findings, and retest checklist"
   },
   {
     "id": "supported-formats",
@@ -39,7 +39,7 @@
     "claim": "Each receipt shows a SHA-256 source hash.",
     "where": "receipt summary",
     "test": "npm test -- --grep @claim:source-hash",
-    "sandbox": "fresh browser opens /demo and observes the source hash in the completed receipt"
+    "sandbox": "fresh browser opens /demo; recompute SHA-256 over every shipped ZIP byte and compare the full digest in the visible receipt and JSON download"
   },
   {
     "id": "parse-errors",
@@ -57,10 +57,10 @@
   },
   {
     "id": "account-free",
-    "claim": "Export Receipt works without an account, analytics, or a server API.",
+    "claim": "Export Receipt is free to use without an account, analytics, or a server API.",
     "where": "landing fact, limits, privacy page, README",
     "test": "npm test -- --grep @claim:account-free",
-    "sandbox": "fresh browser completes real and demo inspections without credential controls, cookies, external requests, or fetch/XHR/API traffic"
+    "sandbox": "fresh browser completes real and demo inspections without payment or credential controls, cookies, external requests, or fetch/XHR/API traffic"
   },
   {
     "id": "preference-storage",
@@ -92,9 +92,9 @@
   },
   {
     "id": "receipt-verification",
-    "claim": "Verify whether a downloaded signed JSON receipt changed after this browser signed it.",
+    "claim": "Check whether a signed JSON receipt matches its bundled signature.",
     "where": "receipt verification panel, inspection step, README",
     "test": "npm test -- --grep @claim:receipt-verification",
-    "sandbox": "fresh browser downloads a demo JSON receipt, verifies it locally, then verifies a tampered copy and observes invalid status"
+    "sandbox": "fresh browser checks valid and tampered receipts, then edits and re-signs with a replacement key and confirms the product never reports unchanged content or browser identity"
   }
 ]

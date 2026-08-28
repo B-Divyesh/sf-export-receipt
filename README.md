@@ -4,9 +4,9 @@ Check a data export before access ends.
 
 It is for people leaving a service or making a backup. It records files, dates, missing categories, unreadable data, and next checks.
 
-The app reads ZIP, JSON, CSV, and text exports in the browser. It hashes your export and parses readable data. It flags unsafe paths and supported missing categories. You can download an HTML receipt or a signed JSON receipt. The app verifies whether a signed JSON receipt changed.
+The app reads ZIP, JSON, CSV, and text exports in the browser. It hashes the complete export and parses readable data. It flags unsafe paths and supported missing categories. You can download an HTML receipt or a signed JSON receipt. The app checks a JSON receipt against its bundled signature. This check cannot identify its signer or detect editing followed by re-signing.
 
-Exports are not uploaded. Category checks support Harbor Mail, Google Takeout, and Meta Download exports. If an export matches more than one layout, the receipt says so instead of guessing.
+Exports are not uploaded. Export Receipt is free to use without an account. Category checks support Harbor Mail, Google Takeout, and Meta Download exports. If an export matches more than one layout, the receipt says so instead of guessing.
 
 Exports must be 50 MB or smaller. ZIPs must contain at most 1,000 entries, expand to 50 MB or less, and stay below 100:1 compression. JSON and CSV files over 20 MB are inventoried but not parsed.
 
@@ -19,7 +19,7 @@ npm ci
 npm run dev
 ```
 
-Open `http://localhost:5173/demo` or `http://localhost:5173/?demo=1` for the isolated sample. It reconstructs sample data in memory and stores nothing.
+Open `http://localhost:5173/demo` or `http://localhost:5173/?demo=1` for the isolated sample. It inspects the shipped Harbor Mail ZIP in memory and stores nothing.
 
 ## Verify and build
 
@@ -40,4 +40,4 @@ Export Receipt has no account, analytics, server API, or export upload. Color mo
 
 ## Catalog description
 
-Check a data export before access ends, then keep a local receipt of files, dates, missing categories, and warnings.
+Check a service export before access ends, then save a local receipt of files, dates, gaps, and warnings.
