@@ -5,6 +5,7 @@
       "src_inspect",
       "src_inspect_analyzeentries",
       "src_inspect_base64urltobytes",
+      "src_inspect_bytestobase64url",
       "src_inspect_classify",
       "src_inspect_countcsvrecords",
       "src_inspect_countrecords",
@@ -23,15 +24,13 @@
       "src_inspect_verifyreceipt",
       "src_inspect_worker",
       "src_inspect_zippreflight",
-      "src_types",
-      "src_types_fileentry",
-      "src_types_finding",
-      "src_types_findinglevel",
-      "src_types_inspection",
+      "src_sample_export",
+      "src_sample_export_sample_export_base64",
+      "src_sample_export_sample_export_name",
+      "src_sample_export_sampleexportbytes",
       "tests_inspect_test"
     ],
     "1": [
-      "src_inspect_bytestobase64url",
       "src_inspect_receiptdata",
       "src_inspect_receiptpayload",
       "src_main",
@@ -127,20 +126,11 @@
       "scripts_live_checks_readdownload",
       "scripts_live_checks_record",
       "scripts_live_checks_result",
+      "scripts_live_checks_samplehash",
+      "scripts_live_checks_samplezip",
       "scripts_live_checks_storage"
     ],
     "6": [
-      "scripts_browser_tests",
-      "scripts_browser_tests_browserstorage",
-      "scripts_browser_tests_claims",
-      "scripts_browser_tests_consoleerrors",
-      "scripts_browser_tests_demo",
-      "scripts_browser_tests_downloadjson",
-      "scripts_browser_tests_freshpage",
-      "scripts_browser_tests_selected",
-      "scripts_browser_tests_setgeneratedfile"
-    ],
-    "7": [
       "src_inspectors",
       "src_inspectors_check",
       "src_inspectors_exportinspector",
@@ -149,7 +139,25 @@
       "src_inspectors_has",
       "src_inspectors_inspectcategories",
       "src_inspectors_inspectors",
-      "src_types_categorycheck"
+      "src_types",
+      "src_types_categorycheck",
+      "src_types_fileentry",
+      "src_types_finding",
+      "src_types_findinglevel",
+      "src_types_inspection"
+    ],
+    "7": [
+      "scripts_browser_tests",
+      "scripts_browser_tests_browserstorage",
+      "scripts_browser_tests_claims",
+      "scripts_browser_tests_consoleerrors",
+      "scripts_browser_tests_demo",
+      "scripts_browser_tests_downloadjson",
+      "scripts_browser_tests_freshpage",
+      "scripts_browser_tests_samplehash",
+      "scripts_browser_tests_samplezip",
+      "scripts_browser_tests_selected",
+      "scripts_browser_tests_setgeneratedfile"
     ],
     "8": [
       "scripts_postbuild",
@@ -177,13 +185,13 @@
   },
   "cohesion": {
     "0": 0.13227513227513227,
-    "1": 0.1956521739130435,
+    "1": 0.20948616600790515,
     "2": 0.09523809523809523,
     "3": 0.125,
     "4": 0.13333333333333333,
-    "5": 0.15384615384615385,
-    "6": 0.2222222222222222,
-    "7": 0.2777777777777778,
+    "5": 0.13333333333333333,
+    "6": 0.17582417582417584,
+    "7": 0.18181818181818182,
     "8": 0.3333333333333333,
     "9": 0.5,
     "10": 1.0,
@@ -192,28 +200,28 @@
   },
   "gods": [
     {
-      "id": "src_main_report",
-      "label": "report()",
-      "degree": 13
-    },
-    {
       "id": "tsconfig_compileroptions",
       "label": "compilerOptions",
       "degree": 13
     },
     {
-      "id": "src_inspect_analyzeentries",
-      "label": "analyzeEntries()",
-      "degree": 10
+      "id": "src_main_report",
+      "label": "report()",
+      "degree": 13
     },
     {
-      "id": "src_main_render",
-      "label": "render()",
+      "id": "src_inspect_analyzeentries",
+      "label": "analyzeEntries()",
       "degree": 9
     },
     {
       "id": "src_main_shell",
       "label": "shell()",
+      "degree": 9
+    },
+    {
+      "id": "src_main_render",
+      "label": "render()",
       "degree": 9
     },
     {
@@ -224,7 +232,7 @@
     {
       "id": "src_inspect_inspectfile",
       "label": "inspectFile()",
-      "degree": 7
+      "degree": 8
     },
     {
       "id": "src_main_route",
@@ -232,13 +240,13 @@
       "degree": 7
     },
     {
-      "id": "src_inspect_sampleinspection",
-      "label": "sampleInspection()",
+      "id": "src_inspectors_inspectcategories",
+      "label": "inspectCategories()",
       "degree": 5
     },
     {
-      "id": "src_inspect_receiptdata",
-      "label": "receiptData()",
+      "id": "tsconfig_compileroptions_lib",
+      "label": "lib",
       "degree": 5
     }
   ],
@@ -288,11 +296,11 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "report()",
-      "target": "receiptData()",
+      "source": "sampleInspection()",
+      "target": "sampleExportBytes()",
       "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
+        "src/inspect.ts",
+        "src/sample-export.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
