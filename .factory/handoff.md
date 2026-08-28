@@ -1,52 +1,51 @@
-# Export Receipt polish round 3 handoff
+# Review 4 handoff — Export Receipt
 
 ## Result
 
-All 22 cumulative findings in `.factory/review-1.md`, `.factory/review-2.md`, and `.factory/review-3.md` are closed. The product-specific archive-workbench design and `pwa-offline` deployment class are unchanged. The finding-by-finding record is `.factory/polish-3.md`.
+Review 4 is complete and recorded in `.factory/review-4.md`. Verdict: **FAIL**. No product code was changed.
 
-The repaired product is live at <https://export-receipt.sociobot.in>. Product repair commit: `92b5a5fb6c59518518065ad1bf26db00a4fe432a`. Static deployment ID: `85ec1df9-cb2a-4d00-8bb4-d4b2c78b9b73`.
+The report records five findings:
 
-## What changed
+- **Blocking:** `F-4-1` receipt verification accepts an edited receipt after its bundled key is replaced and the payload is signed with that replacement key.
+- **Blocking:** `F-4-2` the demo labels a partial in-memory digest as the SHA-256 of a 25,184-byte ZIP that is not shipped.
+- **Major:** `F-4-3` the first-screen facts omit price and do not state privacy directly.
+- **Minor:** `F-4-4` the shared skip link says “inspection” on non-inspection pages.
+- **Minor:** `F-4-5` the ZIP-limit error says “fewer than 1,000 files” while the product accepts 1,000 entries.
 
-- Demo entry works in one click and through `?demo=1`. The persistent banner, Reset, Start for real, browser Back, and wordmark Home all preserve real storage and discard demo state correctly.
-- The first screen uses direct job wording and fits the full action, outcome, and three facts inside 390 × 844.
-- HTML is described and tested as a readable receipt. Signed JSON is described and tested as the locally verifiable receipt.
-- `/`, `/demo`, `/receipt`, `/privacy`, `/terms`, and the designed HTTP 404 have correct titles, metadata, landmarks, focus behavior, mobile layouts, and working navigation.
-- `/receipt` is in the sitemap. The Terms heading, Privacy contact, section label, and illustration caption now say exactly what they mean.
-- `.factory/claims.json` contains 14 claims, each with exactly one observable `@claim:<id>` browser test.
-- `.factory/catalog-description.txt` is a 116-character, verb-first sentence.
+All earlier findings were rechecked against the live site and current source. They remain fixed except `F-1-9`, reopened as `F-4-1` because the current verifier has no independent trust reference.
 
-## Verification
+## Verification performed
 
-Clean-clone verification used a fresh checkout with `npm ci`. Every registered claim command was run separately:
+From fresh clone `/tmp/export-receipt-review4.EQtzCD/repo` at `46b363a8303353504e16a4b12518fa1e26c3f7ad`:
 
-`sample-inventory`, `local-only`, `json-receipt`, `html-receipt`, `supported-formats`, `source-hash`, `parse-errors`, `offline-reload`, `account-free`, `preference-storage`, `demo-isolation`, `safe-archive-limits`, `recognized-layouts`, and `receipt-verification` — all passed.
-
-The same clean checkout passed:
-
-```text
+```sh
+npm ci
+npm test -- --grep @claim:sample-inventory
+npm test -- --grep @claim:local-only
+npm test -- --grep @claim:json-receipt
+npm test -- --grep @claim:html-receipt
+npm test -- --grep @claim:supported-formats
+npm test -- --grep @claim:source-hash
+npm test -- --grep @claim:parse-errors
+npm test -- --grep @claim:offline-reload
+npm test -- --grep @claim:account-free
+npm test -- --grep @claim:preference-storage
+npm test -- --grep @claim:demo-isolation
+npm test -- --grep @claim:safe-archive-limits
+npm test -- --grep @claim:recognized-layouts
+npm test -- --grep @claim:receipt-verification
 npm test
 npm run lint
 npm run build
 npm audit
 npm audit --omit=dev
+npm run verify:live -- https://export-receipt.sociobot.in artifacts/review4-live
 ```
 
-`npm test` ran 8 Vitest tests and the complete production-browser suite. `npm run build` produced `dist/index.html`. Both audit commands reported zero vulnerabilities.
+All commands exited successfully. The independent checks in the review show that the `source-hash`, `html-receipt`, and `receipt-verification` tests under-assert their claims.
 
-Additional evidence:
+Fresh 390 × 844 and 1440 × 900 live loads made the job, audience, and sample action clear. The demo loaded in one click, showed realistic sample results, preserved real storage during Reset/exit, and made same-origin GET requests only. The live route/accessibility/PWA verifier also passed with no unexpected console errors.
 
-- Local axe: 0 violations — `artifacts/axe-local.json`.
-- Local Lighthouse `/demo`: performance 99, accessibility 100, best practices 100, SEO 100; FCP 1.0 s, LCP 1.5 s, CLS 0, TBT 140 ms — `artifacts/lighthouse-local.json`.
-- Factory live verifier: passed in 932 ms with correct title, `lang=en`, one h1, main landmark, complete alt text, and no errors — `artifacts/live/polish-3/verify.json`.
-- Dedicated cold live suite: passed with zero unexpected console errors — `artifacts/live/polish-3-verify.json`.
-- Live axe: 0 violations — `artifacts/live/axe-polish-3.json`.
-- Live Lighthouse `/demo`: 100 performance, accessibility, best practices, and SEO; FCP 0.8 s, LCP 1.1 s, CLS 0, TBT 30 ms — `artifacts/live/lighthouse-polish-3.json`.
-- Live route checks covered direct URLs, exact metadata, focus, 390 px overflow, legal links, sitemap parity, real HTTP 404, CSP/security headers, reduced motion, and one-visit offline reload.
-- Local and live SHA-256 values matched: `index.html` `18378a72…`, `sw.js` `2f73fc33…`, app JS `39c9271e…`, CSS `98cd4cad…`, and hero WebP `44653534…`.
+## Next steps
 
-Run locally with `npm ci && npm run dev`. Recheck with `npm test && npm run lint && npm run build`. Recheck production with `npm run verify:live -- https://export-receipt.sociobot.in artifacts/live`.
-
-## Known gaps and next steps
-
-None. No finding, TODO, stub, or deferred severity remains. Existing unrelated `graphify-out/` modifications were not changed or committed.
+Resolve every finding in `.factory/review-4.md`, strengthen the affected claim tests, then repeat the clean-clone and live review. Existing unrelated `graphify-out/` changes were preserved and are not part of this handoff.
