@@ -11,6 +11,7 @@ const selected = (id) => !grep || grep.includes(id);
 const baseURL = 'http://127.0.0.1:4173';
 const canonicalOrigin = 'https://export-receipt.sociobot.in';
 const consoleErrors = [];
+const isExpected404Console = (message) => /Failed to load resource: the server responded with a status of 404/.test(message);
 const claims = JSON.parse(readFileSync('.factory/claims.json', 'utf8'));
 const sampleBase64 = readFileSync('src/sample-export.ts', 'utf8').match(/SAMPLE_EXPORT_BASE64 = '([^']+)'/)?.[1];
 if (!sampleBase64) throw new Error('The shipped sample ZIP bytes are missing.');
@@ -491,6 +492,25 @@ try {
     await statusPage.screenshot({ path: 'artifacts/404-local.png', fullPage: false });
     await statusContext.close();
 
+    const { context: controlledStatusContext, page: controlledStatusPage } = await freshPage({ width: 390, height: 844 });
+    await controlledStatusPage.goto(baseURL);
+    await controlledStatusPage.evaluate(async () => {
+      await navigator.serviceWorker.ready;
+      if (!navigator.serviceWorker.controller) await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+    });
+    const controlledConsoleStart = consoleErrors.length;
+    const controlledStatusResponse = await controlledStatusPage.goto(`${baseURL}/controlled-pwa-unknown`, { waitUntil: 'networkidle' });
+    if (controlledStatusResponse?.status() !== 404) throw new Error(`A service-worker-controlled unknown route returned ${controlledStatusResponse?.status()} instead of 404.`);
+    await controlledStatusPage.getByRole('heading', { name: 'That page is not here' }).waitFor();
+    if (await controlledStatusPage.getByRole('navigation', { name: 'Primary' }).count() !== 1) throw new Error('The controlled-PWA 404 lacks shared navigation.');
+    if (await controlledStatusPage.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') !== '#main') throw new Error('The controlled-PWA 404 skip link is inconsistent.');
+    const controlledStatusViolations = (await new AxeBuilder({ page: controlledStatusPage }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
+    if (controlledStatusViolations.length) throw new Error(`Controlled-PWA 404 axe violations: ${controlledStatusViolations.map((violation) => violation.id).join(', ')}`);
+    const controlledUnexpectedErrors = consoleErrors.slice(controlledConsoleStart).filter((message) => !isExpected404Console(message));
+    if (controlledUnexpectedErrors.length) throw new Error(`Controlled-PWA 404 console errors: ${controlledUnexpectedErrors.join(' | ')}`);
+    await controlledStatusPage.screenshot({ path: 'artifacts/controlled-404-local.png', fullPage: false });
+    await controlledStatusContext.close();
+
     const staticConfig = JSON.parse(readFileSync('public/staticwebapp.config.json', 'utf8'));
     if (staticConfig.responseOverrides?.['404']?.rewrite !== '/404.html') throw new Error('Static deployment does not route unknown URLs to the designed 404 page.');
 
@@ -517,7 +537,8 @@ try {
       await context.close();
     }
   }
-  if (consoleErrors.length) throw new Error(`Browser console errors: ${consoleErrors.join(' | ')}`);
+  const unexpectedConsoleErrors = consoleErrors.filter((message) => !isExpected404Console(message));
+  if (unexpectedConsoleErrors.length) throw new Error(`Browser console errors: ${unexpectedConsoleErrors.join(' | ')}`);
   console.log(`Browser checks passed${grep ? ` for ${grep}` : ''}.`);
 } finally {
   await browser.close();

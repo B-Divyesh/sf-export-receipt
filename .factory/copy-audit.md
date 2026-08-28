@@ -41,7 +41,7 @@ Word counts treat hyphenated terms, URLs, format abbreviations, and version stri
 | Export Receipt checks local exports before access disappears. | 8 | — |
 | Terms | 1 | — |
 | Built by Param Factory | 4 | — |
-| v1.0.2 | 1 | — |
+| v1.0.3 | 1 | — |
 | An update is ready. | 4 | — |
 | Reload | 1 | — |
 
@@ -61,7 +61,7 @@ Word counts treat hyphenated terms, URLs, format abbreviations, and version stri
 
 ## README and catalog check
 
-Every prose sentence in `README.md` is at most 22 words. The 105-character catalog description starts with **Check** and contains no banned marketing word.
+Every prose sentence in `README.md` is at most 22 words. The 103-character catalog description starts with **Check** and contains no banned marketing word.
 
 ## Terminology
 

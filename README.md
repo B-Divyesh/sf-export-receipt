@@ -40,4 +40,4 @@ Export Receipt has no account, analytics, server API, or export upload. Color mo
 
 ## Catalog description
 
-Check a service export before access ends, then save a local receipt of files, dates, gaps, and warnings.
+Check a service export before access ends and save a local receipt of files, dates, gaps, and warnings.

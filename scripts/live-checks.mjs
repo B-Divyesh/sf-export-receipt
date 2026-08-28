@@ -60,10 +60,10 @@ try {
   await root.page.getByText('Your export stays on this device').waitFor();
   await root.page.getByText('Works offline after first visit').waitFor();
   await root.page.getByText('Free to use · no account needed').waitFor();
-  await root.page.screenshot({ path: `${evidenceDir}/polish-4-root-mobile.png`, fullPage: false });
+  await root.page.screenshot({ path: `${evidenceDir}/polish-5-root-mobile.png`, fullPage: false });
   await root.page.keyboard.press('Tab');
   assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Skip to main content', 'Skip link is not the first Tab target.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-4-focus-mobile.png`, fullPage: false });
+  await root.page.screenshot({ path: `${evidenceDir}/polish-5-focus-mobile.png`, fullPage: false });
   const firstScreenBottom = await root.page.locator('.hero-actions,.facts').evaluateAll((items) => Math.max(...items.map((item) => item.getBoundingClientRect().bottom)));
   assert(firstScreenBottom <= 844, `First-screen facts end at ${firstScreenBottom}px.`);
   for (const name of ['Demo', 'Privacy']) {
@@ -83,12 +83,12 @@ try {
   assert(await root.page.evaluate(() => document.activeElement?.textContent?.trim()) === 'Your export at a glance', 'Demo route did not focus its h1.');
   assert(await root.page.locator('[data-full-hash]').textContent() === sampleHash, 'Live demo digest does not equal SHA-256 over the shipped ZIP.');
   assert((await root.page.locator('.source-hash summary').textContent())?.startsWith(`${sampleZip.byteLength} B`), 'Live demo byte count does not describe the shipped ZIP.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-4-demo-mobile.png`, fullPage: true });
+  await root.page.screenshot({ path: `${evidenceDir}/polish-5-demo-mobile.png`, fullPage: true });
   await root.page.goBack();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
   assert(new URL(root.page.url()).pathname === '/' && await root.page.getByRole('complementary', { name: 'Demo controls' }).count() === 0, 'Back remained trapped in demo mode.');
   assert(await root.page.evaluate(() => document.activeElement?.tagName) === 'H1', 'Back did not focus the landing h1.');
-  await root.page.screenshot({ path: `${evidenceDir}/polish-4-demo-back-mobile.png`, fullPage: false });
+  await root.page.screenshot({ path: `${evidenceDir}/polish-5-demo-back-mobile.png`, fullPage: false });
   await demo(root.page);
   await root.page.getByRole('link', { name: 'EXPORT RECEIPT' }).click();
   await root.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
@@ -146,7 +146,7 @@ try {
   await receipts.page.getByText('Bundled signature matches this receipt. This does not identify who signed it.').waitFor();
   assert(!/has not changed|this browser signed/i.test(await receipts.page.locator('#verification-result').textContent() || ''), 'Replacement-key receipt was falsely described as unchanged or from this browser.');
   await receipts.page.locator('.checklist').scrollIntoViewIfNeeded();
-  await receipts.page.screenshot({ path: `${evidenceDir}/polish-4-receipt-actions-mobile.png`, fullPage: false });
+  await receipts.page.screenshot({ path: `${evidenceDir}/polish-5-receipt-actions-mobile.png`, fullPage: false });
   record('receipt outputs', 'exact shipped-ZIP digest; truthful bundled-signature checks including replacement-key re-signing');
   await receipts.context.close();
 
@@ -174,10 +174,10 @@ try {
     if (route.path === '/privacy') {
       const contact = view.page.getByRole('link', { name: 'Ask a question in the Export Receipt repository (opens in a new tab)' });
       assert(await contact.getAttribute('href') === 'https://github.com/B-Divyesh/sf-export-receipt/issues', 'Privacy contact destination is missing.');
-      await view.page.screenshot({ path: `${evidenceDir}/polish-4-privacy-mobile.png`, fullPage: true });
+      await view.page.screenshot({ path: `${evidenceDir}/polish-5-privacy-mobile.png`, fullPage: true });
     }
-    if (route.path === '/terms') await view.page.screenshot({ path: `${evidenceDir}/polish-4-terms-mobile.png`, fullPage: true });
-    if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-4-receipt-empty-mobile.png`, fullPage: true });
+    if (route.path === '/terms') await view.page.screenshot({ path: `${evidenceDir}/polish-5-terms-mobile.png`, fullPage: true });
+    if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-5-receipt-empty-mobile.png`, fullPage: true });
     await view.context.close();
   }
   record('routes, metadata, legal, mobile, axe', `${routes.length} SPA routes passed direct cold checks`);
@@ -187,14 +187,14 @@ try {
   const sitemap = await sitemapResponse.text();
   for (const route of routes) assert(sitemap.includes(`<loc>${canonicalOrigin}${route.path}</loc>`), `Sitemap omits ${route.path}.`);
   const productionHost = origin === canonicalOrigin;
-  const missingResponse = await staticCheck.page.goto(`${baseURL}${productionHost ? '/does-not-exist-polish-4' : '/404.html'}`, { waitUntil: 'networkidle' });
-  assert(missingResponse?.status() === (productionHost ? 404 : 200), `404 document returned ${missingResponse?.status()}.`);
+  const missingResponse = await staticCheck.page.goto(`${baseURL}/does-not-exist-polish-5`, { waitUntil: 'networkidle' });
+  assert(missingResponse?.status() === 404, `Cold unknown route returned ${missingResponse?.status()} instead of 404.`);
   await staticCheck.page.getByRole('heading', { name: 'That page is not here' }).waitFor();
   assert(await staticCheck.page.getByRole('navigation', { name: 'Primary' }).count() === 1, '404 lacks shared navigation.');
   assert(await staticCheck.page.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') === '#main', '404 skip link is inconsistent.');
   const missingViolations = (await new AxeBuilder({ page: staticCheck.page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
   assert(!missingViolations.length, `404 axe violations: ${missingViolations.map((violation) => violation.id).join(', ')}`);
-  await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-4-404-mobile.png`, fullPage: true });
+  await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-5-404-mobile.png`, fullPage: true });
   const headers = Object.fromEntries(Object.entries(rootResponse?.headers() || {}).map(([key, value]) => [key.toLowerCase(), value]));
   if (productionHost) {
     assert(headers['content-security-policy']?.includes("default-src 'self'") && headers['x-content-type-options'] === 'nosniff' && headers['referrer-policy'] === 'strict-origin-when-cross-origin', `Security headers are incomplete: ${JSON.stringify(headers)}`);
@@ -204,6 +204,23 @@ try {
   }
   record('sitemap, 404, headers', 'all routes listed; unknown URL is styled HTTP 404; CSP/nosniff/referrer policy present');
   await staticCheck.context.close();
+
+  const controlledStatus = await freshPage();
+  await controlledStatus.page.goto(baseURL, { waitUntil: 'networkidle' });
+  await controlledStatus.page.evaluate(async () => {
+    await navigator.serviceWorker.ready;
+    if (!navigator.serviceWorker.controller) await new Promise((resolve) => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
+  });
+  const controlledMissingResponse = await controlledStatus.page.goto(`${baseURL}/does-not-exist-polish-5-controlled`, { waitUntil: 'networkidle' });
+  assert(controlledMissingResponse?.status() === 404, `Controlled-PWA unknown route returned ${controlledMissingResponse?.status()} instead of 404.`);
+  await controlledStatus.page.getByRole('heading', { name: 'That page is not here' }).waitFor();
+  assert(await controlledStatus.page.getByRole('navigation', { name: 'Primary' }).count() === 1, 'Controlled-PWA 404 lacks shared navigation.');
+  assert(await controlledStatus.page.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') === '#main', 'Controlled-PWA 404 skip link is inconsistent.');
+  const controlledMissingViolations = (await new AxeBuilder({ page: controlledStatus.page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
+  assert(!controlledMissingViolations.length, `Controlled-PWA 404 axe violations: ${controlledMissingViolations.map((violation) => violation.id).join(', ')}`);
+  await controlledStatus.page.screenshot({ path: `${evidenceDir}/polish-5-controlled-404-mobile.png`, fullPage: true });
+  record('controlled-PWA 404', 'unknown navigation returned the designed HTTP 404 after service-worker activation');
+  await controlledStatus.context.close();
 
   const offline = await freshPage();
   await demo(offline.page);
@@ -235,6 +252,6 @@ try {
 }
 
 const result = { baseURL, checkedAt: new Date().toISOString(), passed: failures.length === 0, checks, consoleErrors: consoleErrors.filter((message) => !isExpected404Console(message)), expected404Console: consoleErrors.filter(isExpected404Console), failures };
-writeFileSync(`${evidenceDir}/polish-4-verify.json`, `${JSON.stringify(result, null, 2)}\n`);
+writeFileSync(`${evidenceDir}/polish-5-verify.json`, `${JSON.stringify(result, null, 2)}\n`);
 console.log(JSON.stringify(result, null, 2));
 if (failures.length) process.exit(1);
