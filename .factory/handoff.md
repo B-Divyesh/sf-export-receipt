@@ -1,3 +1,15 @@
+# Export Receipt independent verification handoff
+
+## Result: PASS
+
+Independent verification of candidate `2cf61ff312e27d5a4710043f7a95db0e74b0c5c5` at <https://export-receipt.sociobot.in> passed on 2026-08-28 UTC. The live response byte-matches the freshly built candidate for its shell, manifest, worker, app JS, CSS, and hero asset.
+
+The verifier ran `npm ci`, all 12 exact claim commands from `.factory/claims.json`, `npm test`, `npm run lint`, `npm run build`, and both runtime and production dependency audits. All passed. Live testing covered the one-click demo, sample receipt, signed JSON/HTML downloads, invalid and boundary files plus recovery, desktop and 390px mobile, keyboard focus, reduced motion, axe (no serious/critical findings), privacy request logging, headers/caching, service-worker control, and an offline `/demo` reload.
+
+No defects by severity were found and no release-blocking gaps remain. Lighthouse mobile `/demo` measured Performance 93, Accessibility 100, and Best Practices 100. See `.factory/verification-3.md` for exact commands, evidence, and the limited code-inspection note for a true changed-worker update (which cannot be induced on a fixed live deployment).
+
+---
+
 # Export Receipt repair handoff
 
 ## Result: repaired and deployed
