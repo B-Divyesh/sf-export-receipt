@@ -17,6 +17,7 @@
       "src_inspect_max_zip_expanded_bytes",
       "src_inspect_max_zip_ratio",
       "src_inspect_preflightzip",
+      "src_inspect_sampleinspection",
       "src_inspect_sha256",
       "src_inspect_validdate",
       "src_inspect_verifyreceipt",
@@ -25,6 +26,30 @@
       "tests_inspect_test"
     ],
     "1": [
+      "src_inspect_bytestobase64url",
+      "src_inspect_receiptdata",
+      "src_inspect_receiptpayload",
+      "src_main",
+      "src_main_bytes",
+      "src_main_demobar",
+      "src_main_download",
+      "src_main_enterdemo",
+      "src_main_escape",
+      "src_main_handlefile",
+      "src_main_info",
+      "src_main_landing",
+      "src_main_notfound",
+      "src_main_pagemeta",
+      "src_main_receiptempty",
+      "src_main_receipthtml",
+      "src_main_render",
+      "src_main_report",
+      "src_main_route",
+      "src_main_setmeta",
+      "src_main_shell",
+      "src_main_verifyuploadedreceipt"
+    ],
+    "2": [
       "ref_dom",
       "ref_dom_iterable",
       "ref_es2022",
@@ -46,27 +71,6 @@
       "tsconfig_compileroptions_target",
       "tsconfig_compileroptions_usedefineforclassfields",
       "tsconfig_include"
-    ],
-    "2": [
-      "src_inspect_bytestobase64url",
-      "src_inspect_receiptdata",
-      "src_inspect_receiptpayload",
-      "src_inspect_sampleinspection",
-      "src_main",
-      "src_main_bytes",
-      "src_main_demobar",
-      "src_main_download",
-      "src_main_enterdemo",
-      "src_main_escape",
-      "src_main_handlefile",
-      "src_main_info",
-      "src_main_landing",
-      "src_main_notfound",
-      "src_main_receipthtml",
-      "src_main_render",
-      "src_main_report",
-      "src_main_route",
-      "src_main_shell"
     ],
     "3": [
       "axe_core_playwright",
@@ -154,12 +158,12 @@
     ]
   },
   "cohesion": {
-    "0": 0.16883116883116883,
-    "1": 0.09523809523809523,
-    "2": 0.26900584795321636,
+    "0": 0.16600790513833993,
+    "1": 0.21645021645021645,
+    "2": 0.09523809523809523,
     "3": 0.13333333333333333,
     "4": 0.13333333333333333,
-    "5": 0.18681318681318682,
+    "5": 0.17582417582417584,
     "6": 0.2222222222222222,
     "7": 0.3333333333333333,
     "8": 0.5,
@@ -176,7 +180,7 @@
     {
       "id": "src_main_report",
       "label": "report()",
-      "degree": 12
+      "degree": 13
     },
     {
       "id": "src_inspect_analyzeentries",
@@ -184,23 +188,23 @@
       "degree": 10
     },
     {
+      "id": "src_main_shell",
+      "label": "shell()",
+      "degree": 9
+    },
+    {
       "id": "src_main_render",
       "label": "render()",
       "degree": 8
     },
     {
-      "id": "src_inspect_inspectfile",
-      "label": "inspectFile()",
-      "degree": 7
-    },
-    {
-      "id": "src_main_shell",
-      "label": "shell()",
-      "degree": 7
-    },
-    {
       "id": "package_scripts",
       "label": "scripts",
+      "degree": 7
+    },
+    {
+      "id": "src_inspect_inspectfile",
+      "label": "inspectFile()",
       "degree": 7
     },
     {
@@ -209,14 +213,14 @@
       "degree": 6
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
-      "degree": 6
-    },
-    {
       "id": "src_main_route",
       "label": "route()",
       "degree": 6
+    },
+    {
+      "id": "tsconfig_compileroptions_lib",
+      "label": "lib",
+      "degree": 5
     }
   ],
   "surprises": [
@@ -243,28 +247,6 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "report()",
-      "target": "receiptData()",
-      "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "cross-file semantic connection"
-    },
-    {
-      "source": "report()",
-      "target": "receiptPayload()",
-      "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "cross-file semantic connection"
-    },
-    {
       "source": "enterDemo()",
       "target": "sampleInspection()",
       "source_files": [
@@ -273,7 +255,29 @@
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
-      "why": "cross-file semantic connection"
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "render()",
+      "target": "sampleInspection()",
+      "source_files": [
+        "src/main.ts",
+        "src/inspect.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
+    },
+    {
+      "source": "verifyUploadedReceipt()",
+      "target": "verifyReceipt()",
+      "source_files": [
+        "src/main.ts",
+        "src/inspect.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "bridges separate communities"
     }
   ],
   "tokens": {
