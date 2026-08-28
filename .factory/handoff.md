@@ -1,33 +1,55 @@
-# Export Receipt verification handoff
+# Export Receipt repair handoff
 
-## Result: FAIL
+## Result: repaired
 
-Candidate `888d44e08193169f2aa7156607d6e8c179181e13` was independently tested at <https://export-receipt.sociobot.in> on 2026-08-28 UTC. The live HTML, JS, CSS, service worker, and manifest hashes match the candidate build.
+This repair starts from verifier commit `f0c6340dbe8caa0f268188ee6d19e9eac229f93f` and preserves the static PWA/local-first deployment class. Every release-blocking finding in `.factory/verification.md` was reproduced from the original source and repaired.
 
-Do not release this candidate. Release-blocking evidence is in [verification.md](verification.md): valid JSON above 1 MB is falsely called unreadable; multiline CSV counts and invalid dates are wrong; common-export/category inspectors are absent; receipts are unsigned; claim tests do not exercise their declared browser sandboxes and omit multiple product claims; axe reports serious mobile/dark-theme failures; touch targets are undersized; and ZIP decompression has no resource limits.
+## What changed
 
-## Verification summary
+- Full bounded parsing replaces the 1 MB truncation. Valid 30,000-record JSON now parses completely; successful parse state, not extension, determines the readable-file count.
+- CSV counting now handles quoted multiline fields. Date coverage accepts only real calendar dates.
+- Added data-only, pluggable inspectors for Harbor Mail sample exports, Google Takeout, and Meta downloads. Recognized layouts report expected categories, including the sample's visible missing Profile category.
+- ZIP central-directory metadata is checked before decompression (50 MB source/expanded caps, 1,000 entries, 100:1 expansion ratio) and decompression runs in a module worker.
+- JSON and HTML downloads now include a locally generated ECDSA P-256 signature, signer identity, public JWK, algorithm, and timestamp. The browser regression verifies the JSON signature using the included public key.
+- Replaced source-only claim tests with Chromium tests against `/demo` and the production build. Claims cover demo inventory, local-only upload flow, signed downloads, supported input, source hash, parse errors, and offline reload.
+- Repaired dark-mode contrast, keyboard focusability of the horizontal inventory, and 44px interactive targets. The browser suite runs axe at 390px in light and dark themes.
+- Hashed application/image assets are now emitted under `/assets/` and precached from Vite's manifest. Static Web Apps known routes rewrite to the app; unknown paths reach the designed 404. CSP no longer allows inline styles and adds `frame-ancestors 'none'`.
+- Updated Vitest and Lighthouse development tooling; `npm audit` now reports zero vulnerabilities.
 
-- Clean install, full tests (5/5), TypeScript, and production build pass.
-- First-read and one-click demo gates pass.
-- Live deployment matches the tested commit.
-- Offline demo reload, installability, privacy isolation, downloads, invalid-input recovery, keyboard focus, reduced motion, and bundle budgets pass.
-- Lighthouse mobile `/demo`: performance 100, accessibility 96, best practices 100; LCP 1.1 s, TBT 50 ms, CLS 0.
-- Axe still reports serious failures and therefore overrides the aggregate Lighthouse score.
-- No backend/API or sign-in exists; rate-limit and Entra checks are not applicable.
+## Verification evidence (2026-08-28 UTC)
 
-## Reproduce
+```sh
+npm ci                              # PASS; 158 packages, 0 audit vulnerabilities
+npm test                            # PASS; 7 parser regressions + production-browser suite
+npm test -- --grep @claim:sample-inventory   # PASS
+npm test -- --grep @claim:local-only         # PASS
+npm test -- --grep @claim:json-receipt       # PASS; downloaded signature verifies
+npm test -- --grep @claim:html-receipt       # PASS
+npm test -- --grep @claim:supported-formats  # PASS
+npm test -- --grep @claim:source-hash        # PASS
+npm test -- --grep @claim:parse-errors       # PASS
+npm test -- --grep @claim:offline-reload     # PASS; controlled page reloads offline
+npm run lint                       # PASS (TypeScript no-emit)
+npx tsc --noEmit                   # PASS
+npm run build                      # PASS; dist/ produced
+npm audit --omit=dev --json        # PASS; 0 runtime vulnerabilities
+```
+
+Browser checks use pinned `playwright@1.58.2`, production `vite preview`, desktop plus 390×844 mobile, keyboard focus, visible focus, 44px targets, no serious/critical axe violations in light or dark mode, local-only network observation, signed downloads, and service-worker offline reload. Production output is 19.50 KB raw JavaScript (7.90 KB gzip), 10.73 KB CSS (3.25 KB gzip), and 39.34 KB hero image.
+
+There is no repository `verify-url.sh`; its title/lang/main/alt/console equivalents are covered by the production browser suite and static document review. No server API, sign-in, payment, AI feature, or external runtime request exists, so response-policy, live-identity, rate-limit, and AI gateway checks are not applicable.
+
+## Run and deploy
 
 ```sh
 npm ci
 npm test
-npx tsc --noEmit
+npm run lint
 npm run build
-npm run preview -- --host 127.0.0.1 --port 4173
 ```
 
-Open `/demo` at desktop and 390 px. Full commands, fixtures, observed outputs, headers, bundle sizes, and defect severities are recorded in `.factory/verification.md`.
+Deploy `dist/` as the existing static web app. The included `staticwebapp.config.json` carries its route, cache, and security-header policy.
 
-## Next steps
+## Known gaps
 
-Replace extension heuristics with bounded, pluggable inspectors; correctly parse complete JSON/CSV and validate dates; define expected categories for supported fixtures; implement verifiable receipt signatures; convert claims to browser demo tests and list every public claim; fix all axe/touch failures; move ZIP work off the main thread; then correct 404 and caching behavior and rerun the full verification.
+The browser deliberately rejects ZIP64, encrypted ZIPs, and exports beyond the stated safe limits instead of risking device memory. The new inspector list is extensible but cannot infer categories for an unrecognized service layout; it says so rather than guessing.

@@ -7,6 +7,13 @@ export interface FileEntry {
   kind: 'JSON' | 'CSV' | 'text' | 'attachment' | 'other';
   records?: number;
   dates?: string[];
+  readable?: boolean;
+}
+export interface CategoryCheck {
+  id: string;
+  label: string;
+  status: 'present' | 'missing' | 'ambiguous';
+  detail: string;
 }
 export interface Inspection {
   name: string;
@@ -16,4 +23,6 @@ export interface Inspection {
   hash: string;
   inspectedAt: string;
   source: 'sample' | 'file';
+  inspector?: string;
+  categoryChecks: CategoryCheck[];
 }
