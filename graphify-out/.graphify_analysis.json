@@ -1,24 +1,6 @@
 {
   "communities": {
     "0": [
-      "promises",
-      "src_inspect",
-      "src_inspect_analyzeentries",
-      "src_inspect_classify",
-      "src_inspect_countrecords",
-      "src_inspect_datesin",
-      "src_inspect_decode",
-      "src_inspect_inspectfile",
-      "src_inspect_sampleinspection",
-      "src_inspect_sha256",
-      "src_types",
-      "src_types_fileentry",
-      "src_types_finding",
-      "src_types_findinglevel",
-      "src_types_inspection",
-      "tests_inspect_test"
-    ],
-    "1": [
       "ref_src",
       "ref_tests",
       "tsconfig",
@@ -35,6 +17,23 @@
       "tsconfig_compileroptions_target",
       "tsconfig_compileroptions_usedefineforclassfields",
       "tsconfig_include"
+    ],
+    "1": [
+      "src_inspect",
+      "src_inspect_analyzeentries",
+      "src_inspect_classify",
+      "src_inspect_countrecords",
+      "src_inspect_datesin",
+      "src_inspect_decode",
+      "src_inspect_inspectfile",
+      "src_inspect_sampleinspection",
+      "src_inspect_sha256",
+      "src_types",
+      "src_types_fileentry",
+      "src_types_finding",
+      "src_types_findinglevel",
+      "src_types_inspection",
+      "tests_inspect_test"
     ],
     "2": [
       "src_inspect_receiptdata",
@@ -104,8 +103,8 @@
     ]
   },
   "cohesion": {
-    "0": 0.24166666666666667,
-    "1": 0.125,
+    "0": 0.125,
+    "1": 0.26666666666666666,
     "2": 0.3523809523809524,
     "3": 0.14285714285714285,
     "4": 0.18181818181818182,
@@ -141,13 +140,13 @@
       "degree": 7
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_inspect_inspectfile",
+      "label": "inspectFile()",
       "degree": 6
     },
     {
-      "id": "src_inspect_inspectfile",
-      "label": "inspectFile()",
+      "id": "src_main_landing",
+      "label": "landing()",
       "degree": 6
     },
     {
@@ -161,8 +160,8 @@
       "degree": 6
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 6
     }
   ],
