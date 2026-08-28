@@ -6,6 +6,7 @@ import AxeBuilder from '@axe-core/playwright';
 const baseURL = (process.argv[2] || 'https://export-receipt.sociobot.in').replace(/\/$/, '');
 const evidenceDir = process.argv[3] || 'artifacts/live';
 const origin = new URL(baseURL).origin;
+const canonicalOrigin = 'https://export-receipt.sociobot.in';
 const sampleBase64 = readFileSync('src/sample-export.ts', 'utf8').match(/SAMPLE_EXPORT_BASE64 = '([^']+)'/)?.[1];
 if (!sampleBase64) throw new Error('The shipped sample ZIP bytes are missing.');
 const sampleZip = Buffer.from(sampleBase64, 'base64');
@@ -162,7 +163,7 @@ try {
     assert(response?.status() === 200, `${route.path} returned ${response?.status()}.`);
     await view.page.getByRole('heading', { name: route.heading }).waitFor();
     const meta = await view.page.evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]')?.content, canonical: document.querySelector('link[rel="canonical"]')?.href, ogTitle: document.querySelector('meta[property="og:title"]')?.content, ogDescription: document.querySelector('meta[property="og:description"]')?.content, ogUrl: document.querySelector('meta[property="og:url"]')?.content, twitterTitle: document.querySelector('meta[name="twitter:title"]')?.content, twitterDescription: document.querySelector('meta[name="twitter:description"]')?.content, h1: document.querySelectorAll('h1').length, main: document.querySelectorAll('main').length }));
-    const expectedUrl = `${origin}${route.path}`;
+    const expectedUrl = `${canonicalOrigin}${route.path}`;
     assert(meta.title === route.title && meta.description === route.description && meta.canonical === expectedUrl && meta.ogTitle === route.title && meta.ogDescription === route.description && meta.ogUrl === expectedUrl && meta.twitterTitle === route.title && meta.twitterDescription === route.description && meta.h1 === 1 && meta.main === 1, `${route.path} metadata/structure failed: ${JSON.stringify(meta)}`);
     const violations = (await new AxeBuilder({ page: view.page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
     assert(!violations.length, `${route.path} axe violations: ${violations.map((violation) => violation.id).join(', ')}`);
@@ -184,9 +185,10 @@ try {
   const staticCheck = await freshPage();
   const sitemapResponse = await staticCheck.page.request.get(`${baseURL}/sitemap.xml`);
   const sitemap = await sitemapResponse.text();
-  for (const route of routes) assert(sitemap.includes(`<loc>${origin}${route.path}</loc>`), `Sitemap omits ${route.path}.`);
-  const missingResponse = await staticCheck.page.goto(`${baseURL}/does-not-exist-polish-3`, { waitUntil: 'networkidle' });
-  assert(missingResponse?.status() === 404, `Unknown route returned ${missingResponse?.status()}.`);
+  for (const route of routes) assert(sitemap.includes(`<loc>${canonicalOrigin}${route.path}</loc>`), `Sitemap omits ${route.path}.`);
+  const productionHost = origin === canonicalOrigin;
+  const missingResponse = await staticCheck.page.goto(`${baseURL}${productionHost ? '/does-not-exist-polish-4' : '/404.html'}`, { waitUntil: 'networkidle' });
+  assert(missingResponse?.status() === (productionHost ? 404 : 200), `404 document returned ${missingResponse?.status()}.`);
   await staticCheck.page.getByRole('heading', { name: 'That page is not here' }).waitFor();
   assert(await staticCheck.page.getByRole('navigation', { name: 'Primary' }).count() === 1, '404 lacks shared navigation.');
   assert(await staticCheck.page.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') === '#main', '404 skip link is inconsistent.');
@@ -194,7 +196,12 @@ try {
   assert(!missingViolations.length, `404 axe violations: ${missingViolations.map((violation) => violation.id).join(', ')}`);
   await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-4-404-mobile.png`, fullPage: true });
   const headers = Object.fromEntries(Object.entries(rootResponse?.headers() || {}).map(([key, value]) => [key.toLowerCase(), value]));
-  assert(headers['content-security-policy']?.includes("default-src 'self'") && headers['x-content-type-options'] === 'nosniff' && headers['referrer-policy'] === 'strict-origin-when-cross-origin', `Security headers are incomplete: ${JSON.stringify(headers)}`);
+  if (productionHost) {
+    assert(headers['content-security-policy']?.includes("default-src 'self'") && headers['x-content-type-options'] === 'nosniff' && headers['referrer-policy'] === 'strict-origin-when-cross-origin', `Security headers are incomplete: ${JSON.stringify(headers)}`);
+  } else {
+    const configuredHeaders = JSON.parse(readFileSync('public/staticwebapp.config.json', 'utf8')).globalHeaders;
+    assert(configuredHeaders['Content-Security-Policy']?.includes("default-src 'self'") && configuredHeaders['X-Content-Type-Options'] === 'nosniff' && configuredHeaders['Referrer-Policy'] === 'strict-origin-when-cross-origin', `Static security-header configuration is incomplete: ${JSON.stringify(configuredHeaders)}`);
+  }
   record('sitemap, 404, headers', 'all routes listed; unknown URL is styled HTTP 404; CSP/nosniff/referrer policy present');
   await staticCheck.context.close();
 

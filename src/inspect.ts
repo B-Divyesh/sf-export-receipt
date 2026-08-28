@@ -90,7 +90,7 @@ export function analyzeEntries(name: string, bytes: number, raw: Record<string, 
   if (allDates.length) findings.push({ level: 'ok', title: `Date coverage: ${allDates[0]} to ${allDates.at(-1)}`, detail: `Found dates across ${new Set(allDates).size} valid calendar days in readable files.` });
   if (categories.ambiguous) findings.push({ level: 'warn', title: 'Ambiguous export layout', detail: `This export matches ${categories.ambiguous.join(' and ')}. Check the categories manually before relying on a missing-category result.` });
   for (const category of categories.checks.filter((item) => item.status !== 'present')) findings.push({ level: 'warn', title: `Missing category: ${category.label}`, detail: category.detail });
-  findings.unshift({ level: 'info', title: `${files.length} files inventoried`, detail: `${readable.length} successfully parsed JSON or CSV files; ${attachments.length} attachment${attachments.length === 1 ? '' : 's'}.` });
+  findings.unshift({ level: 'info', title: `${files.length} file${files.length === 1 ? '' : 's'} inventoried`, detail: `${readable.length} successfully parsed JSON or CSV files; ${attachments.length} attachment${attachments.length === 1 ? '' : 's'}.` });
   return { name, bytes, files: files.sort((a, b) => a.path.localeCompare(b.path)), findings, hash, inspectedAt: new Date().toISOString(), source, inspector: categories.name, categoryChecks: categories.checks };
 }
 

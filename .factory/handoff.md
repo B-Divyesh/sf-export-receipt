@@ -1,51 +1,51 @@
-# Review 4 handoff — Export Receipt
+# Export Receipt polish round 4 handoff
 
 ## Result
 
-Review 4 is complete and recorded in `.factory/review-4.md`. Verdict: **FAIL**. No product code was changed.
+All 27 cumulative findings in `.factory/review-1.md` through `.factory/review-4.md` are closed. The finding-by-finding record is `.factory/polish-4.md`. The neo-brutalist archive-workbench identity and `pwa-offline` artifact class are unchanged.
 
-The report records five findings:
+The repaired product is at <https://export-receipt.sociobot.in>. Product repair commit: `87289df03b1c0ff0706694e702ec12ca2b9e2013`.
 
-- **Blocking:** `F-4-1` receipt verification accepts an edited receipt after its bundled key is replaced and the payload is signed with that replacement key.
-- **Blocking:** `F-4-2` the demo labels a partial in-memory digest as the SHA-256 of a 25,184-byte ZIP that is not shipped.
-- **Major:** `F-4-3` the first-screen facts omit price and do not state privacy directly.
-- **Minor:** `F-4-4` the shared skip link says “inspection” on non-inspection pages.
-- **Minor:** `F-4-5` the ZIP-limit error says “fewer than 1,000 files” while the product accepts 1,000 entries.
+## What changed
 
-All earlier findings were rechecked against the live site and current source. They remain fixed except `F-1-9`, reopened as `F-4-1` because the current verifier has no independent trust reference.
+- The sample is one deterministic 869-byte Harbor Mail ZIP bundled with the app. Demo inspection uses the same `inspectFile()` path as a real export.
+- The full sample SHA-256 is `312216e21b560a39c5bfac1b493917144b901fd25d1504777f0eaa462bc8b6c5`. Browser tests recompute it and compare the UI, JSON, and HTML receipts.
+- JSON checking now promises only what its bundled key proves. The UI states that it cannot identify the signer or detect editing followed by re-signing.
+- The replacement-key adversarial fixture edits and re-signs a receipt. The product never labels that file unchanged or attributes it to the current browser.
+- The first screen now states privacy, offline use, and price directly. Its complete action and fact row end at 599 px on a 390 × 844 viewport.
+- Every route and static status page uses **Skip to main content**. Route titles, metadata, focus behavior, links, legal pages, and the designed HTTP 404 remain covered.
+- ZIP error wording matches the implemented boundaries. Exactly 1,000 entries and exactly 50 MB expanded data pass; values above either boundary fail.
+- Singular receipt counts were corrected. The catalog description is verb-first and 105 characters.
 
-## Verification performed
+## Verification
 
-From fresh clone `/tmp/export-receipt-review4.EQtzCD/repo` at `46b363a8303353504e16a4b12518fa1e26c3f7ad`:
+A fresh clone at the repaired commit used `npm ci`. All 14 registered claim commands passed separately:
 
-```sh
-npm ci
-npm test -- --grep @claim:sample-inventory
-npm test -- --grep @claim:local-only
-npm test -- --grep @claim:json-receipt
-npm test -- --grep @claim:html-receipt
-npm test -- --grep @claim:supported-formats
-npm test -- --grep @claim:source-hash
-npm test -- --grep @claim:parse-errors
-npm test -- --grep @claim:offline-reload
-npm test -- --grep @claim:account-free
-npm test -- --grep @claim:preference-storage
-npm test -- --grep @claim:demo-isolation
-npm test -- --grep @claim:safe-archive-limits
-npm test -- --grep @claim:recognized-layouts
-npm test -- --grep @claim:receipt-verification
+`sample-inventory`, `local-only`, `json-receipt`, `html-receipt`, `supported-formats`, `source-hash`, `parse-errors`, `offline-reload`, `account-free`, `preference-storage`, `demo-isolation`, `safe-archive-limits`, `recognized-layouts`, and `receipt-verification`.
+
+The clean clone also passed:
+
+```text
 npm test
 npm run lint
 npm run build
 npm audit
 npm audit --omit=dev
-npm run verify:live -- https://export-receipt.sociobot.in artifacts/review4-live
 ```
 
-All commands exited successfully. The independent checks in the review show that the `source-hash`, `html-receipt`, and `receipt-verification` tests under-assert their claims.
+`npm test` ran 9 Vitest regressions and the full production-browser suite. `npm run build` produced `dist/index.html`. Build sizes: app JavaScript 25.02 kB raw / 10.06 kB gzip; worker 11.67 kB raw; CSS 12.30 kB raw / 3.58 kB gzip; hero WebP 39.34 kB.
 
-Fresh 390 × 844 and 1440 × 900 live loads made the job, audience, and sample action clear. The demo loaded in one click, showed realistic sample results, preserved real storage during Reset/exit, and made same-origin GET requests only. The live route/accessibility/PWA verifier also passed with no unexpected console errors.
+Additional evidence:
 
-## Next steps
+- Local factory URL verifier: pass with no console errors — `artifacts/local-polish-4/verify-url/verify.json`.
+- Local dedicated route/browser/axe/privacy/offline suite: pass — `artifacts/local-polish-4/polish-4-verify.json`.
+- Local Lighthouse `/demo`: performance 99, accessibility 100, best practices 100, SEO 100; FCP 1.0 s, LCP 1.4 s, CLS 0, TBT 120 ms — `artifacts/local-polish-4/lighthouse.json`.
+- Live factory URL verifier: `artifacts/live/polish-4/verify-url/verify.json`.
+- Live dedicated cold-check suite: `artifacts/live/polish-4/polish-4-verify.json`.
+- Live screenshots: `artifacts/live/polish-4/`.
 
-Resolve every finding in `.factory/review-4.md`, strengthen the affected claim tests, then repeat the clean-clone and live review. Existing unrelated `graphify-out/` changes were preserved and are not part of this handoff.
+Run locally with `npm ci && npm run dev`. Recheck with `npm test && npm run lint && npm run build`. Recheck production with `npm run verify:live -- https://export-receipt.sociobot.in artifacts/live/polish-4`.
+
+## Known gaps and next steps
+
+None. No finding, TODO, stub, or deferred severity remains.

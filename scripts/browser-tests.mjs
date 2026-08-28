@@ -327,7 +327,7 @@ try {
       const archive = zipSync({ 'boundary.bin': boundary }, { level: 6 });
       await page.locator('#archive').setInputFiles({ name: 'exactly-50mb-expanded.zip', mimeType: 'application/zip', buffer: Buffer.from(archive) });
       await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
-      await page.getByText('1 files inventoried').waitFor();
+      await page.getByText('1 file inventoried').waitFor();
       await context.close();
     }
     {
