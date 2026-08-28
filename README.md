@@ -4,7 +4,7 @@ Check a data export before access ends.
 
 It is for people leaving a service or making a backup. It records files, dates, missing categories, unreadable data, and next checks.
 
-The app reads ZIP, JSON, CSV, and text exports in the browser. It hashes your export and parses readable data. It flags unsafe paths and supported missing categories. You can download signed HTML or JSON receipts.
+The app reads ZIP, JSON, CSV, and text exports in the browser. It hashes your export and parses readable data. It flags unsafe paths and supported missing categories. You can download an HTML receipt or a signed JSON receipt. The app verifies whether a signed JSON receipt changed.
 
 Exports are not uploaded. Category checks support Harbor Mail, Google Takeout, and Meta Download exports. If an export matches more than one layout, the receipt says so instead of guessing.
 
@@ -27,9 +27,10 @@ Open `http://localhost:5173/demo` or `http://localhost:5173/?demo=1` for the iso
 npm test
 npm run lint
 npm run build
+npm run verify:live -- https://export-receipt.sociobot.in artifacts/live
 ```
 
-Browser tests cover every registered claim. They also check demo isolation, limits, downloads, offline use, keyboard access, route metadata, the 404 page, and both color modes.
+Browser tests cover every registered claim. They also check demo isolation, Back and Home navigation, limits, downloads, offline use, and keyboard access. Route metadata, the sitemap, the 404 page, and both color modes are checked too.
 
 The static deploy output is `dist/`, with `index.html` at its root. Deploy that directory with the included `staticwebapp.config.json`.
 
@@ -39,4 +40,4 @@ Export Receipt has no account, analytics, server API, or export upload. Color mo
 
 ## Catalog description
 
-Check a data export before access ends with a local receipt of files, dates, categories, and warnings.
+Check a data export before access ends, then keep a local receipt of files, dates, missing categories, and warnings.

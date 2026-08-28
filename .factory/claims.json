@@ -1,16 +1,100 @@
 [
-  {"id":"sample-inventory","claim":"The sample receipt shows files, attachments, date coverage, and a missing category check.","where":"demo receipt","test":"npm test -- --grep @claim:sample-inventory","sandbox":"fresh 390px browser context opens the shipped /demo archive and observes its inventory and category finding"},
-  {"id":"local-only","claim":"Archive inspection runs in your browser and does not upload archives.","where":"landing facts, picker, privacy page","test":"npm test -- --grep @claim:local-only","sandbox":"fresh browser uploads a fixture while every browser request is observed; only same-origin product assets are allowed"},
-  {"id":"json-receipt","claim":"Download a signed JSON receipt with next checks.","where":"receipt action and How it works","test":"npm test -- --grep @claim:json-receipt","sandbox":"fresh browser /demo click downloads JSON; the included WebCrypto public key verifies its signature"},
-  {"id":"html-receipt","claim":"Download a signed HTML receipt with next checks.","where":"receipt action and How it works","test":"npm test -- --grep @claim:html-receipt","sandbox":"fresh browser /demo click downloads HTML and asserts signer and signature evidence"},
-  {"id":"supported-formats","claim":"Open ZIP, JSON, CSV, or text exports on this device.","where":"file picker","test":"npm test -- --grep @claim:supported-formats","sandbox":"fresh browser separately uploads ZIP, JSON, CSV, and text fixtures and observes a completed receipt for each"},
-  {"id":"source-hash","claim":"Each receipt shows a SHA-256 source hash.","where":"receipt summary","test":"npm test -- --grep @claim:source-hash","sandbox":"fresh browser opens /demo and observes the source hash in the completed receipt"},
-  {"id":"parse-errors","claim":"The inspection flags unreadable data files.","where":"How it works","test":"npm test -- --grep @claim:parse-errors","sandbox":"fresh browser uploads a malformed JSON fixture and observes its parse-error finding"},
-  {"id":"offline-reload","claim":"Works offline after the first visit.","where":"landing fact","test":"npm test -- --grep @claim:offline-reload","sandbox":"fresh browser opens /demo, waits for the service worker, goes offline, reloads, and observes the sample receipt"},
-  {"id":"account-free","claim":"Export Receipt works without an account, analytics, or a server API.","where":"landing fact, limits, privacy page, README","test":"npm test -- --grep @claim:account-free","sandbox":"fresh browser completes real and demo inspections without credential controls, cookies, external requests, or fetch/XHR/API traffic"},
-  {"id":"preference-storage","claim":"Color mode is the only browser preference Export Receipt stores.","where":"privacy page, README","test":"npm test -- --grep @claim:preference-storage","sandbox":"fresh browser starts with empty web storage, changes color mode, reloads it, and observes only the namespaced theme preference"},
-  {"id":"demo-isolation","claim":"Demo data stays in memory, is not saved, and disappears when the visitor leaves the demo.","where":"demo banner, privacy page, README, demo documentation","test":"npm test -- --grep @claim:demo-isolation","sandbox":"fresh /demo context resets and exits the sample while localStorage, sessionStorage, IndexedDB, and demo fetch/XHR traffic remain empty"},
-  {"id":"safe-archive-limits","claim":"Inspection flags unsafe paths and enforces the documented source, entry, expansion, ratio, and text-size limits.","where":"README, inspection errors","test":"npm test -- --grep @claim:safe-archive-limits","sandbox":"fresh browsers upload unsafe-path, over-50-MB source, over-1,000-entry, over-50-MB-expanded, over-100:1-ratio, and over-20-MB-text fixtures and observe the exact safe outcomes"}
-  ,{"id":"recognized-layouts","claim":"Category checks support Harbor Mail, Google Takeout, and Meta Download exports.","where":"README, inspection step, matched-layout note","test":"npm test -- --grep @claim:recognized-layouts","sandbox":"fresh browsers upload positive, missing-category, ambiguous-match, and non-match ZIP fixtures for each named layout and observe the matched layout and category findings"}
-  ,{"id":"receipt-verification","claim":"Verify whether a downloaded signed JSON receipt changed after this browser signed it.","where":"receipt verification panel, inspection step","test":"npm test -- --grep @claim:receipt-verification","sandbox":"fresh browser downloads a demo JSON receipt, verifies it locally, then verifies a tampered copy and observes invalid status"}
+  {
+    "id": "sample-inventory",
+    "claim": "The sample receipt shows files, attachments, date coverage, and a missing category check.",
+    "where": "demo receipt",
+    "test": "npm test -- --grep @claim:sample-inventory",
+    "sandbox": "fresh 390px browser context opens the shipped /demo export and observes all four promised outcomes"
+  },
+  {
+    "id": "local-only",
+    "claim": "Export inspection runs in your browser and does not upload exports.",
+    "where": "landing facts, picker, privacy page",
+    "test": "npm test -- --grep @claim:local-only",
+    "sandbox": "fresh browser uploads a fixture while every request is observed; no upload, API, or cross-origin request is allowed"
+  },
+  {
+    "id": "json-receipt",
+    "claim": "Download a signed JSON receipt with next checks.",
+    "where": "receipt action and How it works",
+    "test": "npm test -- --grep @claim:json-receipt",
+    "sandbox": "fresh browser /demo click downloads JSON; the included WebCrypto public key verifies the signature and next checks are present"
+  },
+  {
+    "id": "html-receipt",
+    "claim": "Download an HTML receipt with the source hash, findings, and next checks.",
+    "where": "receipt action and How it works",
+    "test": "npm test -- --grep @claim:html-receipt",
+    "sandbox": "fresh browser /demo click downloads HTML and observes the sample name, full source hash, findings, and retest checklist"
+  },
+  {
+    "id": "supported-formats",
+    "claim": "Open ZIP, JSON, CSV, or text exports on this device.",
+    "where": "file picker",
+    "test": "npm test -- --grep @claim:supported-formats",
+    "sandbox": "fresh browser separately uploads ZIP, JSON, CSV, and text fixtures and observes a completed receipt for each"
+  },
+  {
+    "id": "source-hash",
+    "claim": "Each receipt shows a SHA-256 source hash.",
+    "where": "receipt summary",
+    "test": "npm test -- --grep @claim:source-hash",
+    "sandbox": "fresh browser opens /demo and observes the source hash in the completed receipt"
+  },
+  {
+    "id": "parse-errors",
+    "claim": "The inspection flags unreadable data files.",
+    "where": "How it works",
+    "test": "npm test -- --grep @claim:parse-errors",
+    "sandbox": "fresh browser uploads a malformed JSON fixture and observes its parse-error finding"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "Works offline after the first visit.",
+    "where": "landing fact",
+    "test": "npm test -- --grep @claim:offline-reload",
+    "sandbox": "fresh browser opens /demo once, waits for the service worker without another navigation, goes offline, reloads, and observes the complete sample receipt"
+  },
+  {
+    "id": "account-free",
+    "claim": "Export Receipt works without an account, analytics, or a server API.",
+    "where": "landing fact, limits, privacy page, README",
+    "test": "npm test -- --grep @claim:account-free",
+    "sandbox": "fresh browser completes real and demo inspections without credential controls, cookies, external requests, or fetch/XHR/API traffic"
+  },
+  {
+    "id": "preference-storage",
+    "claim": "Color mode is the only browser preference Export Receipt stores.",
+    "where": "privacy page, README",
+    "test": "npm test -- --grep @claim:preference-storage",
+    "sandbox": "fresh browser starts with empty web storage, changes color mode, reloads it, and observes only the namespaced theme preference"
+  },
+  {
+    "id": "demo-isolation",
+    "claim": "Demo data stays in memory, is not saved, and disappears when the visitor leaves the demo.",
+    "where": "demo banner, privacy page, README, demo documentation",
+    "test": "npm test -- --grep @claim:demo-isolation",
+    "sandbox": "fresh /demo contexts exercise reset, Start for real, browser Back, and wordmark Home while real storage remains byte-for-byte unchanged and no data request occurs"
+  },
+  {
+    "id": "safe-archive-limits",
+    "claim": "Inspection flags unsafe paths and enforces the documented source, entry, expansion, ratio, and text-size limits.",
+    "where": "README, inspection errors",
+    "test": "npm test -- --grep @claim:safe-archive-limits",
+    "sandbox": "fresh browsers upload unsafe-path, over-50-MB source, over-1,000-entry, over-50-MB-expanded, over-100:1-ratio, and over-20-MB-text fixtures and observe the exact safe outcomes"
+  },
+  {
+    "id": "recognized-layouts",
+    "claim": "Category checks support Harbor Mail, Google Takeout, and Meta Download exports.",
+    "where": "README, inspection step, matched-layout note",
+    "test": "npm test -- --grep @claim:recognized-layouts",
+    "sandbox": "fresh browsers upload positive, missing-category, ambiguous-match, and non-match ZIP fixtures for each named layout and observe the matched layout and category findings"
+  },
+  {
+    "id": "receipt-verification",
+    "claim": "Verify whether a downloaded signed JSON receipt changed after this browser signed it.",
+    "where": "receipt verification panel, inspection step, README",
+    "test": "npm test -- --grep @claim:receipt-verification",
+    "sandbox": "fresh browser downloads a demo JSON receipt, verifies it locally, then verifies a tampered copy and observes invalid status"
+  }
 ]

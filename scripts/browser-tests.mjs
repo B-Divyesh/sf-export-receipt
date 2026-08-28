@@ -60,18 +60,22 @@ try {
     await demo(page);
     await page.getByRole('heading', { name: 'File inventory' }).waitFor();
     if (await page.locator('tbody tr').count() !== 4) throw new Error('Demo inventory did not show four shipped sample files.');
+    await page.getByText('2 successfully parsed JSON or CSV files; 1 attachment.').waitFor();
+    await page.getByText('Date coverage: 2022-02-19 to 2025-01-08').waitFor();
     await page.getByText('Missing category: Profile').waitFor();
     await context.close();
   }
 
   if (selected('@claim:local-only')) {
     const { context, page } = await freshPage();
-    const external = [];
-    context.on('request', (request) => { if (new URL(request.url()).origin !== baseURL) external.push(request.url()); });
+    const requests = [];
+    context.on('request', (request) => requests.push({ url: request.url(), method: request.method(), type: request.resourceType() }));
     await page.goto(baseURL);
     await page.locator('#archive').setInputFiles({ name: 'export.json', mimeType: 'application/json', buffer: Buffer.from('[{"created_at":"2025-01-08"}]') });
     await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
-    if (external.length) throw new Error(`Archive flow made an external request: ${external.join(', ')}`);
+    const external = requests.filter((request) => new URL(request.url).origin !== baseURL);
+    const dataTraffic = requests.filter((request) => request.method !== 'GET' || ['xhr', 'eventsource', 'websocket'].includes(request.type) || new URL(request.url).pathname.startsWith('/api/'));
+    if (external.length || dataTraffic.length) throw new Error(`Export flow made a data or external request: ${JSON.stringify({ external, dataTraffic })}`);
     await context.close();
   }
 
@@ -92,15 +96,18 @@ try {
   }
 
   if (selected('@claim:html-receipt')) {
-    const { context, page } = await freshPage();
+    const { context, page } = await freshPage({ width: 390, height: 844 });
     await demo(page);
+    await page.locator('.checklist').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'artifacts/receipt-actions-mobile.png', fullPage: false });
     const downloadPromise = page.waitForEvent('download');
-    await page.getByRole('button', { name: 'Download signed HTML receipt' }).click();
+    await page.getByRole('button', { name: 'Download HTML receipt' }).click();
     const download = await downloadPromise;
     const stream = await download.createReadStream();
     let output = '';
     for await (const chunk of stream) output += chunk;
-    if (!output.includes('Signed by: Export Receipt local browser') || !output.includes('Signature:')) throw new Error('Downloaded HTML receipt has no visible signature evidence.');
+    const expected = ['Export: harbor-mail-export.zip', 'SHA-256:', 'Missing category: Profile', 'Retest checklist', 'Use the signed JSON receipt when you need to check for changes.'];
+    if (!expected.every((value) => output.includes(value)) || /Signed by:|<p>Signature:/.test(output)) throw new Error('Downloaded HTML receipt does not contain the promised plain receipt evidence.');
     await context.close();
   }
 
@@ -173,6 +180,7 @@ try {
     const before = await browserStorage(page);
     if (Object.keys(before.local).length || Object.keys(before.session).length || before.databases.length) throw new Error(`Fresh browser storage was not empty: ${JSON.stringify(before)}`);
     await page.getByRole('button', { name: 'Use dark colors' }).click();
+    if (await page.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Use light colors') throw new Error('The color control lost keyboard focus after changing the theme.');
     const after = await browserStorage(page);
     if (JSON.stringify(after.local) !== JSON.stringify({ 'export-receipt:theme': 'dark' }) || Object.keys(after.session).length || after.databases.length) throw new Error(`Color mode stored unexpected browser data: ${JSON.stringify(after)}`);
     await page.reload();
@@ -193,6 +201,7 @@ try {
     await page.getByRole('button', { name: 'Use light colors' }).click();
     await page.getByRole('button', { name: 'Reset demo' }).click();
     await page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
+    if (await page.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Your export at a glance') throw new Error('Reset demo did not return focus to the rebuilt receipt heading.');
     const during = await browserStorage(page);
     if (JSON.stringify(during) !== JSON.stringify(realBeforeDemo)) throw new Error(`Demo changed real browser data: ${JSON.stringify({ realBeforeDemo, during })}`);
     await page.getByRole('button', { name: 'Start for real' }).click();
@@ -202,6 +211,27 @@ try {
     const demoTraffic = requests.filter((request) => request.method !== 'GET' || ['fetch', 'xhr', 'eventsource', 'websocket'].includes(request.type));
     if (JSON.stringify(after) !== JSON.stringify(realBeforeDemo) || demoTraffic.length) throw new Error(`Demo persisted data or made data requests: ${JSON.stringify({ after, demoTraffic })}`);
     await context.close();
+
+    const back = await freshPage({ width: 390, height: 844 });
+    await back.page.goto(baseURL);
+    await back.page.getByRole('button', { name: 'Try it with sample data' }).click();
+    await back.page.getByRole('heading', { name: 'Your export at a glance' }).waitFor();
+    if (await back.page.evaluate(() => document.activeElement?.textContent?.trim()) !== 'Your export at a glance') throw new Error('Entering the demo did not move focus to its final heading.');
+    await back.page.goBack();
+    await back.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
+    if (new URL(back.page.url()).pathname !== '/' || await back.page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('Browser Back did not leave the demo and discard its sample workspace.');
+    if (await back.page.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('Browser Back from the demo did not move focus to the landing heading.');
+    await back.page.locator('.hero-art img').evaluate((image) => image.complete ? undefined : new Promise((resolve) => image.addEventListener('load', resolve, { once: true })));
+    await back.page.screenshot({ path: 'artifacts/demo-exit-mobile.png', fullPage: false });
+    await back.context.close();
+
+    const home = await freshPage({ width: 390, height: 844 });
+    await demo(home.page);
+    await home.page.getByRole('link', { name: 'EXPORT RECEIPT' }).click();
+    await home.page.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
+    if (new URL(home.page.url()).pathname !== '/' || await home.page.getByRole('region', { name: 'Demo controls' }).count()) throw new Error('The wordmark did not leave the demo and discard its sample workspace.');
+    if (await home.page.evaluate(() => document.activeElement?.tagName) !== 'H1') throw new Error('The wordmark route did not move focus to the landing heading.');
+    await home.context.close();
   }
 
   if (selected('@claim:recognized-layouts')) {
@@ -328,23 +358,44 @@ try {
     await claimContext.close();
 
     const routes = [
-      ['/', 'Export Receipt — Check your data export', '/', 'Check your export before access ends'],
-      ['/demo', 'Demo — Export Receipt', '/demo', 'Your export at a glance'],
-      ['/privacy', 'Privacy — Export Receipt', '/privacy', 'Your export stays on your device'],
-      ['/terms', 'Terms — Export Receipt', '/terms', 'Use Export Receipt at your own pace'],
-      ['/receipt', 'No receipt is open — Export Receipt', '/receipt', 'No receipt is open'],
+      { path: '/', title: 'Export Receipt — Check your data export', heading: 'Check your export before access ends', description: 'Inspect a data export before you lose access. Get a local receipt of what is present, missing, and readable.' },
+      { path: '/demo', title: 'Demo — Export Receipt', heading: 'Your export at a glance', description: 'Try the Harbor Mail sample export. Nothing is saved.' },
+      { path: '/privacy', title: 'Privacy — Export Receipt', heading: 'Your export stays on your device', description: 'Read how Export Receipt keeps exports on your device.' },
+      { path: '/terms', title: 'Terms — Export Receipt', heading: 'Terms for using Export Receipt', description: 'Read the terms for using Export Receipt.' },
+      { path: '/receipt', title: 'No receipt is open — Export Receipt', heading: 'No receipt is open', description: 'Choose an export or open the sample receipt.' },
     ];
-    for (const [path, title, canonicalPath, heading] of routes) {
-      const { context, page } = await freshPage();
+    for (const { path, title, heading, description } of routes) {
+      const { context, page } = await freshPage({ width: 390, height: 844 });
       await page.goto(`${baseURL}${path}`);
       await page.getByRole('heading', { name: heading }).waitFor();
-      const metadata = await page.evaluate(() => ({ title: document.title, canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'), description: document.querySelector('meta[name="description"]')?.getAttribute('content'), ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content'), twitterTitle: document.querySelector('meta[name="twitter:title"]')?.getAttribute('content') }));
-      if (metadata.title !== title || metadata.canonical !== `${canonicalOrigin}${canonicalPath}` || !metadata.description || metadata.ogTitle !== title || metadata.twitterTitle !== title) throw new Error(`Route metadata is incomplete for ${path}: ${JSON.stringify(metadata)}`);
+      const metadata = await page.evaluate(() => ({ title: document.title, canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'), description: document.querySelector('meta[name="description"]')?.getAttribute('content'), ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content'), ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content'), ogUrl: document.querySelector('meta[property="og:url"]')?.getAttribute('content'), twitterTitle: document.querySelector('meta[name="twitter:title"]')?.getAttribute('content'), twitterDescription: document.querySelector('meta[name="twitter:description"]')?.getAttribute('content'), h1: document.querySelectorAll('h1').length, main: document.querySelectorAll('main').length, header: document.querySelectorAll('header').length, footer: document.querySelectorAll('footer').length }));
+      const expectedUrl = `${canonicalOrigin}${path}`;
+      if (metadata.title !== title || metadata.canonical !== expectedUrl || metadata.description !== description || metadata.ogTitle !== title || metadata.ogDescription !== description || metadata.ogUrl !== expectedUrl || metadata.twitterTitle !== title || metadata.twitterDescription !== description || metadata.h1 !== 1 || metadata.main !== 1 || metadata.header !== 1 || metadata.footer !== 1) throw new Error(`Route structure or metadata is incomplete for ${path}: ${JSON.stringify(metadata)}`);
+      const routeViolations = (await new AxeBuilder({ page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
+      const routeGeometry = await page.evaluate(() => ({ viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth }));
+      if (routeViolations.length || routeGeometry.content !== routeGeometry.viewport) throw new Error(`Route accessibility or mobile overflow failed for ${path}: ${JSON.stringify({ routeViolations: routeViolations.map((violation) => violation.id), routeGeometry })}`);
       await context.close();
     }
 
+    const sitemap = readFileSync('public/sitemap.xml', 'utf8');
+    const sitemapPaths = [...sitemap.matchAll(/<loc>https:\/\/export-receipt\.sociobot\.in(\/[^<]*)<\/loc>/g)].map((match) => match[1]);
+    const routePaths = routes.map((route) => route.path);
+    if (JSON.stringify(sitemapPaths.sort()) !== JSON.stringify(routePaths.sort())) throw new Error(`Sitemap and SPA routes differ: ${JSON.stringify({ sitemapPaths, routePaths })}`);
+    const robots = readFileSync('public/robots.txt', 'utf8');
+    if (!robots.includes('Sitemap: https://export-receipt.sociobot.in/sitemap.xml')) throw new Error('robots.txt does not publish the sitemap URL.');
+    const catalog = readFileSync('.factory/catalog-description.txt', 'utf8').trim();
+    if (catalog.length > 120 || !catalog.startsWith('Check ')) throw new Error(`Catalog description is not verb-first or exceeds 120 characters: ${catalog.length} ${catalog}`);
+
     const { context: mobileContext, page: mobilePage } = await freshPage({ width: 390, height: 844 });
     await mobilePage.goto(baseURL);
+    await mobilePage.getByRole('heading', { name: 'Check your export before access ends' }).waitFor();
+    await mobilePage.getByText('For people leaving a service, see what your export contains before an account disappears.').waitFor();
+    await mobilePage.getByRole('button', { name: 'Try it with sample data' }).waitFor();
+    await mobilePage.getByText('Loads a sample receipt now.').waitFor();
+    const landingCopy = await mobilePage.locator('main h1, main h2, main p, main figcaption, main .steps span, main .facts li, main button').allTextContents();
+    const bannedCopy = /\b(leverage|seamless|effortless|robust|powerful|intuitive|reimagine|supercharge|unlock|delightful|journey|ecosystem|AI-powered)\b/i;
+    const longSentences = landingCopy.flatMap((copy) => copy.split(/(?<=[.!?])\s+/)).map((copy) => copy.trim()).filter(Boolean).filter((copy) => copy.split(/\s+/).length > 22);
+    if (landingCopy.some((copy) => bannedCopy.test(copy)) || longSentences.length) throw new Error(`Landing copy failed the plain-words audit: ${JSON.stringify(longSentences)}`);
     const firstScreenBottom = await mobilePage.locator('.hero-actions,.facts').evaluateAll((items) => Math.max(...items.map((item) => item.getBoundingClientRect().bottom)));
     if (firstScreenBottom > 844) throw new Error(`The mobile first-screen action outcome or facts are below the viewport (${firstScreenBottom}px).`);
     await mobilePage.screenshot({ path: 'artifacts/mobile-first-screen.png', fullPage: false });
@@ -366,9 +417,21 @@ try {
     }
     await mobileNavigationContext.close();
 
+    const { context: legalContext, page: legalPage } = await freshPage({ width: 390, height: 844 });
+    await legalPage.goto(`${baseURL}/privacy`);
+    const contact = legalPage.getByRole('link', { name: 'Ask a question in the Export Receipt repository (opens in a new tab)' });
+    if (await contact.getAttribute('href') !== 'https://github.com/B-Divyesh/sf-export-receipt/issues' || await contact.getAttribute('target') !== '_blank') throw new Error('The privacy contact link does not provide the verified repository destination.');
+    await legalPage.screenshot({ path: 'artifacts/privacy-mobile.png', fullPage: false });
+    await legalPage.goto(`${baseURL}/terms`);
+    await legalPage.getByRole('heading', { name: 'Terms for using Export Receipt' }).waitFor();
+    await legalPage.screenshot({ path: 'artifacts/terms-mobile.png', fullPage: false });
+    await legalContext.close();
+
     const { context: statusContext, page: statusPage } = await freshPage({ width: 390, height: 844 });
     await statusPage.goto(`${baseURL}/404.html`);
     await statusPage.getByRole('heading', { name: 'That page is not here' }).waitFor();
+    const statusMetadata = await statusPage.evaluate(() => ({ title: document.title, description: document.querySelector('meta[name="description"]')?.getAttribute('content'), canonical: document.querySelector('link[rel="canonical"]')?.getAttribute('href'), ogTitle: document.querySelector('meta[property="og:title"]')?.getAttribute('content'), ogDescription: document.querySelector('meta[property="og:description"]')?.getAttribute('content'), ogUrl: document.querySelector('meta[property="og:url"]')?.getAttribute('content'), twitterTitle: document.querySelector('meta[name="twitter:title"]')?.getAttribute('content'), twitterDescription: document.querySelector('meta[name="twitter:description"]')?.getAttribute('content') }));
+    if (JSON.stringify(statusMetadata) !== JSON.stringify({ title: 'Page not found — Export Receipt', description: 'This Export Receipt page is not available.', canonical: `${canonicalOrigin}/404`, ogTitle: 'Page not found — Export Receipt', ogDescription: 'This Export Receipt page is not available.', ogUrl: `${canonicalOrigin}/404`, twitterTitle: 'Page not found — Export Receipt', twitterDescription: 'This Export Receipt page is not available.' })) throw new Error(`The 404 metadata is incomplete: ${JSON.stringify(statusMetadata)}`);
     const statusViolations = (await new AxeBuilder({ page: statusPage }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
     if (statusViolations.length || await statusPage.getByRole('navigation', { name: 'Primary' }).count() !== 1) throw new Error(`The 404 page is not accessible or lacks shared navigation: ${statusViolations.map((violation) => violation.id).join(', ')}`);
     const statusTargets = await statusPage.locator('a').evaluateAll((items) => items.filter((item) => { const rect = item.getBoundingClientRect(); const style = getComputedStyle(item); return style.display !== 'none' && style.visibility !== 'hidden' && (rect.width < 44 || rect.height < 44); }).map((item) => item.textContent?.trim()));
