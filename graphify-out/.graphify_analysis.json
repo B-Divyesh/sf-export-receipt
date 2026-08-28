@@ -194,13 +194,13 @@
       "degree": 7
     },
     {
-      "id": "package_scripts",
-      "label": "scripts",
+      "id": "src_main_shell",
+      "label": "shell()",
       "degree": 7
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
+      "id": "package_scripts",
+      "label": "scripts",
       "degree": 7
     },
     {
@@ -209,13 +209,13 @@
       "degree": 6
     },
     {
-      "id": "src_main_route",
-      "label": "route()",
+      "id": "src_main_landing",
+      "label": "landing()",
       "degree": 6
     },
     {
-      "id": "src_main_landing",
-      "label": "landing()",
+      "id": "src_main_route",
+      "label": "route()",
       "degree": 6
     }
   ],
@@ -243,19 +243,8 @@
       "why": "bridges separate communities"
     },
     {
-      "source": "enterDemo()",
-      "target": "sampleInspection()",
-      "source_files": [
-        "src/main.ts",
-        "src/inspect.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "calls",
-      "why": "cross-file semantic connection"
-    },
-    {
-      "source": "render()",
-      "target": "sampleInspection()",
+      "source": "report()",
+      "target": "receiptData()",
       "source_files": [
         "src/main.ts",
         "src/inspect.ts"
@@ -266,7 +255,18 @@
     },
     {
       "source": "report()",
-      "target": "receiptData()",
+      "target": "receiptPayload()",
+      "source_files": [
+        "src/main.ts",
+        "src/inspect.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "enterDemo()",
+      "target": "sampleInspection()",
       "source_files": [
         "src/main.ts",
         "src/inspect.ts"
