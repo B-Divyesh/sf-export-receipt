@@ -17,8 +17,8 @@
 | Open an export on this device. | 6 | — |
 | Count files, dates, categories, attachments, and parse errors. | 8 | — |
 | Download a signed HTML or JSON receipt with next checks. | 10 | — |
-| It does not log in, scrape accounts, move data, or decide legal compliance. | 13 | — |
-| It flags what it can see. | 7 | — |
+| It inspects only the file you choose. | 7 | — |
+| It does not connect to your service account. | 8 | — |
 
 No sentence exceeds 22 words. No banned terms appear.
 
