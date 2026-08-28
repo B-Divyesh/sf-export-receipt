@@ -1,21 +1,28 @@
-# Export Receipt polish 2 handoff
+# Export Receipt review 3 handoff
 
 ## Result
 
-Released the zero-finding repair for review candidate `7ce9f7d7599ed7833cf87f40b9e5b4672bda3a01`. The repair commit is `c6f34d2e4c23f83ca45a163d2cf7e44b558408d3` (`fix: restore mobile receipt navigation`), deployed to <https://export-receipt.sociobot.in>.
+Completed a full adversarial first-read review of repository commit `5bd4884473ca8dec431b91c11e26a877aad30b77` and the matching live deployment at <https://export-receipt.sociobot.in>.
 
-The 390 px header now retains compact, 44 px **Demo** and **Privacy** controls. The less urgent same-page **How it works** anchor remains available on desktop and is deliberately omitted only at the compact breakpoint. The existing receipt-workbench identity, demo sandbox, local-only processing, PWA, and routing system were preserved.
+Verdict: **FAIL**. The detailed report is `.factory/review-3.md`. It records two blocking findings and five minor findings. No product code was changed.
 
-## Verification
+## Verification performed
 
-- Clean clone: `/tmp/export-receipt-clean.2zC9rh/repo` at `c6f34d2e4c23f83ca45a163d2cf7e44b558408d3`; `npm ci` reported 0 vulnerabilities.
-- Every exact registry command was run separately from that clone and passed: `sample-inventory`, `local-only`, `json-receipt`, `html-receipt`, `supported-formats`, `source-hash`, `parse-errors`, `offline-reload`, `account-free`, `preference-storage`, `demo-isolation`, `safe-archive-limits`, `recognized-layouts`, and `receipt-verification`.
-- Full clean-clone `npm test` passed (8 unit tests plus the production-browser suite). `npm run lint`, `npm run build`, and `npm audit --omit=dev --audit-level=high` passed. Build output is `dist/`; app JS is 23.62 kB raw / 9.06 kB gzip and CSS is 11.61 kB raw / 3.44 kB gzip.
-- Browser suite covered 390 px first-screen geometry, header navigation targets/routes, keyboard start and route focus, demo isolation, request privacy, formats, hostile archive limits, signed downloads/verification, routing/metadata/404, service-worker offline reload, and axe serious/critical checks in light and dark modes.
-- Deployed with `/opt/fleet/lib/deploy-static.sh export-receipt /work/repo/dist`; Static Web Apps deployment `dcb31a19-024f-4e56-b703-f87440ab2f56` succeeded.
-- Cold live verification passed: `/opt/fleet/lib/verify-url.sh` reported 200, 614 ms load, no console errors, `lang="en"`, one h1, main landmark, and image alt text. Evidence: `/tmp/export-receipt-polish-2-live/verify.json`, `screenshot-desktop.png`, and `screenshot-mobile.png`.
-- Fresh live Chromium checks passed for 44 px mobile Demo/Privacy links; `?demo=1` redirect, banner, reset, and real-data exit; storage isolation; offline `/demo` reload; route-specific metadata and HTTP 404; and axe serious/critical checks in both themes.
+- Fresh 390 × 844 and 1440 × 900 cold reads with screenshots in `/tmp/export-receipt-review-3/`.
+- Live one-click demo, Reset, Start for real, seeded real-storage isolation, request logging, direct `?demo=1`, and one-visit offline reload.
+- Live route metadata, direct HTTP statuses, link crawl, focus/history checks, 404, and light/dark axe checks across all routes.
+- `/opt/fleet/lib/verify-url.sh https://export-receipt.sociobot.in /tmp/export-receipt-review-3/verify` passed after creating the evidence directory.
+- Clean clone `/tmp/export-receipt-review3-clean/repo`: `npm ci`, all 14 exact claim commands separately, full `npm test`, `npm run lint`, and `npm run build` passed.
+- Live app JavaScript, CSS, and hero-image SHA-256 hashes match the clean build.
 
-## Notes
+## Findings to repair
 
-No known product gaps remain. Pre-existing `graphify-out/` working-tree changes were left untouched.
+1. F-3-1: entering demo traps browser Back and the wordmark on `/demo`.
+2. F-1-9 reopened: the landing promises HTML-or-JSON verification, but only JSON is verifiable and the HTML claim test checks text only.
+3. F-3-2: `/receipt` is absent from `sitemap.xml`.
+4. F-3-3: **THE RECEIPT DESK** is decorative metaphor copy.
+5. F-3-4: the Terms h1 does not name the page.
+6. F-3-5: the Privacy contact instruction provides no destination.
+7. F-3-6: the landing caption exposes an internal asset-production note.
+
+Pre-existing changes in `graphify-out/` were left untouched.
