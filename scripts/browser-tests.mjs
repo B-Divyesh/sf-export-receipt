@@ -350,6 +350,22 @@ try {
     await mobilePage.screenshot({ path: 'artifacts/mobile-first-screen.png', fullPage: false });
     await mobileContext.close();
 
+    const { context: mobileNavigationContext, page: mobileNavigationPage } = await freshPage({ width: 390, height: 844 });
+    await mobileNavigationPage.goto(baseURL);
+    for (const [name, path, heading] of [
+      ['Demo', '/demo', 'Your export at a glance'],
+      ['Privacy', '/privacy', 'Your export stays on your device'],
+    ]) {
+      const link = mobileNavigationPage.getByRole('navigation', { name: 'Primary' }).getByRole('link', { name });
+      const box = await link.boundingBox();
+      if (!box || box.width < 44 || box.height < 44) throw new Error(`Mobile header ${name} link is not a usable 44px target.`);
+      await link.click();
+      await mobileNavigationPage.getByRole('heading', { name: heading }).waitFor();
+      if (new URL(mobileNavigationPage.url()).pathname !== path) throw new Error(`Mobile header ${name} link did not navigate to ${path}.`);
+      if (path !== '/') await mobileNavigationPage.goto(baseURL);
+    }
+    await mobileNavigationContext.close();
+
     const { context: statusContext, page: statusPage } = await freshPage({ width: 390, height: 844 });
     await statusPage.goto(`${baseURL}/404.html`);
     await statusPage.getByRole('heading', { name: 'That page is not here' }).waitFor();
