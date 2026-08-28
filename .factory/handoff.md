@@ -4,6 +4,8 @@
 
 This repair starts from verifier commit `f0c6340dbe8caa0f268188ee6d19e9eac229f93f` and preserves the static PWA/local-first deployment class. Every release-blocking finding in `.factory/verification.md` was reproduced from the original source and repaired.
 
+Repair commit `73394b4c8a35ce0ceb0c389afc645f76c886e539` was pushed to `origin/main`. The work order supplies only the `static` deployment class: this repository has no deploy script, Static Web Apps token, Azure resource target, or GitHub Actions deployment workflow. At 2026-08-28 16:31 UTC the public URL still served the prior `app.js` build (last modified 15:17 UTC), so the factory static publisher had not propagated the pushed commit yet. No infrastructure, DNS, or billing configuration was changed.
+
 ## What changed
 
 - Full bounded parsing replaces the 1 MB truncation. Valid 30,000-record JSON now parses completely; successful parse state, not extension, determines the readable-file count.
