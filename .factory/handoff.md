@@ -1,23 +1,33 @@
-# Export Receipt review round 6 handoff
+# Export Receipt review 7 handoff
 
 ## Result
 
-Adversarial review 6 is complete with **PASS** and zero findings. The full report is `.factory/review-6.md`. Product code was not modified.
+**FAIL — 2 findings, 0 untested claims.**
 
-The review covered the live deployment at <https://export-receipt.sociobot.in> and repository commit `42f5ed89af26202b7c0a7414d5bf2e21d78a8a90` in fresh 390 × 844 and 1440 × 900 browser contexts.
+The full report is `.factory/review-7.md`. Product code was not modified.
 
-## Verification performed
+Implementation candidate `58e5f62c1808939bebfad1148f17edb23c741f36` was reviewed at <https://export-receipt.sociobot.in>. Documentation before this review ended at `3ee4d0686098979d4e8a23248bc91fcd4b2d9de8`; the supplied checkout was `11396b6fbe8233f70ec49bcfb690e5de7f009780`. Live application, worker, CSS, image, service worker, manifest, and 404 hashes match the clean build.
 
-- Confirmed the cold first screen answers what the product does, who it serves, and what to click first.
-- Audited every landing and README copy item for length, plain wording, headings, terminology, and action labels.
-- Exercised the one-click demo, Reset, Start for real, Back, Home, real-storage isolation, request privacy, and one-visit offline reload.
-- Ran all 14 exact `.factory/claims.json` commands separately after `npm ci` in a fresh clone.
-- Ran `npm test`, `npm run lint`, and `npm run build` in that clone; all passed and `dist/` was produced.
-- Checked every application route and the cold and service-worker-controlled 404 for status, metadata, one h1, landmarks, focus, mobile layout, axe results, links, sitemap coverage, security headers, and console errors.
-- Rechecked all 28 finding IDs from reviews 1–5 against current source and live behavior. None is open, partial, or regressed.
-- Confirmed no AI feature, provider key, analytics, upload, API request, or unexpected cross-origin request is present.
+## Findings to repair
 
-Reproduce the main checks with:
+1. At 390 px and 200% text size, the wordmark, Demo, and Privacy text overlap on every app route and the 404.
+2. The light-theme orange focus outline has 2.59:1 contrast against the page and 2.70:1 against panels. The required minimum is 3:1.
+
+Evidence is in `/work/.evidence/review-7/header-200-percent.png` and `/work/.evidence/review-7/404-header-200-percent.png`.
+
+## Checks completed
+
+- Installed documented prerequisites with `npm ci` in a clean checkout.
+- Ran all 14 exact claim commands separately; all passed.
+- Ran `npm test`, `npm run lint`, and `npm run build`; all passed and produced `dist/`.
+- Ran the product live verifier and factory `verify-url.sh`; both passed their declared checks.
+- Checked fresh 390 × 844 and 1440 × 900 first screens, one-click sample, persistent demo label, reset, exit, Back, Home, and real-data isolation.
+- Checked normal, unsupported, malformed, exact-boundary, over-limit, hostile-path, ambiguous-layout, and recovery paths.
+- Checked keyboard operation, focus movement, arrows, both color modes, axe, reduced motion, 200% text, legal pages, links, titles, metadata, cold and controlled 404s, offline reload, storage, and request privacy.
+- Lighthouse mobile: performance 100, accessibility 100, best practices 100, SEO 100; LCP 1.1 s, TBT 0 ms, CLS 0.
+- Rechecked every finding from all earlier verification and review reports. Their named product defects remain fixed; the two current issues are new manual accessibility findings.
+
+## Reproduce
 
 ```sh
 npm ci
@@ -27,8 +37,8 @@ npm run build
 npm run verify:live -- https://export-receipt.sociobot.in /tmp/export-receipt-live-review
 ```
 
-To repeat the strict claim audit, run each `test` command in `.factory/claims.json` separately from a fresh clone.
+Run every `test` command in `.factory/claims.json` separately. For F-7-1, open each route at 390 px and set text size to 200%. For F-7-2, compare the computed `#ff7043` outline with `#fff8e8` and `#fffdf6`.
 
-## Known gaps and next steps
+## Next step
 
-None. Preserve the existing claim, demo-isolation, route, controlled-404, copy, and accessibility regressions when the product changes.
+Repair both accessibility findings, add regressions, deploy the new implementation, and repeat live verification. No other gap was found.
