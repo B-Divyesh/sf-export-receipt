@@ -7,6 +7,7 @@
 - Ink `#18211d` (primary text/outline), paper `#fff8e8` (warm app ground), panel `#fffdf6`
 - Lime `#c9ff4d` (primary action), orange `#ff7043` (warning), blue `#4f8cff` (information)
 - Success `#176b43`, danger `#b12b28`, muted `#53605a`
+- Focus `#9f3216` on light paper and `#ff8a65` at night; both clear 3:1 against their adjacent surfaces.
 - Night mode: ink `#f5f0e5`, paper `#17201b`, panel `#233128`; retain lime as the action color.
 
 ## Type and spacing

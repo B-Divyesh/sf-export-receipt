@@ -60,6 +60,97 @@ async function setGeneratedFile(page, name, size) {
   }, { fileName: name, fileSize: size });
 }
 
+function contrastRatio(foreground, background) {
+  const channels = (value) => {
+    const hex = value.trim().match(/^#([\da-f]{6})$/i)?.[1];
+    const rgb = hex
+      ? [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map((part) => Number.parseInt(part, 16))
+      : value.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+    if (!rgb || rgb.length !== 3) throw new Error(`Cannot parse color ${value}.`);
+    return rgb.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+  };
+  const luminance = (value) => {
+    const [red, green, blue] = channels(value);
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+  };
+  const [lighter, darker] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+async function headerTextLayoutAt200Percent(page) {
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  return page.locator('header').evaluate((header) => {
+    const controls = [...header.querySelectorAll('a, button')]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      })
+      .map((element) => {
+        const box = element.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const text = range.getBoundingClientRect();
+        return {
+          name: element.textContent?.trim() || element.getAttribute('aria-label') || element.tagName,
+          box: { left: box.left, top: box.top, right: box.right, bottom: box.bottom },
+          text: { left: text.left, top: text.top, right: text.right, bottom: text.bottom },
+        };
+      });
+    const overflow = controls.filter(({ box, text }) => text.left < box.left - 2 || text.top < box.top - 2 || text.right > box.right + 2 || text.bottom > box.bottom + 2).map(({ name }) => name);
+    const overlaps = [];
+    const crowded = [];
+    for (let first = 0; first < controls.length; first += 1) {
+      for (let second = first + 1; second < controls.length; second += 1) {
+        const a = controls[first].text;
+        const b = controls[second].text;
+        if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1) overlaps.push(`${controls[first].name} / ${controls[second].name}`);
+        const aBox = controls[first].box;
+        const bBox = controls[second].box;
+        const horizontalGap = Math.max(bBox.left - aBox.right, aBox.left - bBox.right, 0);
+        const verticalGap = Math.max(bBox.top - aBox.bottom, aBox.top - bBox.bottom, 0);
+        if (Math.max(horizontalGap, verticalGap) < 7.5) crowded.push(`${controls[first].name} / ${controls[second].name}`);
+      }
+    }
+    return { viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth, controls, overflow, overlaps, crowded };
+  });
+}
+
+async function skipLinkLayoutAt200Percent(page) {
+  const skip = page.getByRole('link', { name: 'Skip to main content' });
+  const viewport = page.viewportSize();
+  const bounds = (element) => {
+    const box = element.getBoundingClientRect();
+    return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height };
+  };
+  const hidden = await skip.evaluate(bounds);
+  await skip.focus();
+  const focused = await skip.evaluate(bounds);
+  await skip.evaluate((element) => element.blur());
+  return { viewport, hidden, focused };
+}
+
+async function focusContrast(page, selector, surfaceVariables) {
+  const target = page.locator(selector).first();
+  await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
+  for (let presses = 0; presses < 50 && !(await target.evaluate((element) => element === document.activeElement)); presses += 1) await page.keyboard.press('Tab');
+  const evidence = await target.evaluate((element, variables) => {
+    const style = getComputedStyle(element);
+    const tokens = getComputedStyle(document.querySelector('#app') || document.documentElement);
+    return {
+      keyboardFocused: element === document.activeElement && element.matches(':focus-visible'),
+      outlineColor: style.outlineColor,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+      surfaces: variables.map((variable) => tokens.getPropertyValue(variable).trim()),
+    };
+  }, surfaceVariables);
+  const ratios = evidence.surfaces.map((surface) => contrastRatio(evidence.outlineColor, surface));
+  return { ...evidence, ratios };
+}
+
 try {
   if (selected('@claim:sample-inventory')) {
     const { context, page } = await freshPage({ width: 390, height: 844 });
@@ -423,6 +514,11 @@ try {
       if (routeViolations.length || routeGeometry.content !== routeGeometry.viewport) throw new Error(`Route accessibility or mobile overflow failed for ${path}: ${JSON.stringify({ routeViolations: routeViolations.map((violation) => violation.id), routeGeometry })}`);
       const skip = page.getByRole('link', { name: 'Skip to main content' });
       if (await skip.count() !== 1 || await skip.getAttribute('href') !== '#main') throw new Error(`Route ${path} does not use the common skip-link name and target.`);
+      const zoomedHeader = await headerTextLayoutAt200Percent(page);
+      if (zoomedHeader.content !== zoomedHeader.viewport || zoomedHeader.overflow.length || zoomedHeader.overlaps.length || zoomedHeader.crowded.length) throw new Error(`Route ${path} header fails at 200% text: ${JSON.stringify(zoomedHeader)}`);
+      const zoomedSkip = await skipLinkLayoutAt200Percent(page);
+      if (!zoomedSkip.viewport || zoomedSkip.hidden.bottom > 0 || zoomedSkip.focused.left < 0 || zoomedSkip.focused.top < 0 || zoomedSkip.focused.right > zoomedSkip.viewport.width || zoomedSkip.focused.bottom > zoomedSkip.viewport.height) throw new Error(`Route ${path} skip link fails at 200% text: ${JSON.stringify(zoomedSkip)}`);
+      if (path === '/') await page.screenshot({ path: 'artifacts/header-200-percent-local.png', fullPage: false });
       await context.close();
     }
 
@@ -489,6 +585,13 @@ try {
     if (await statusPage.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') !== '#main') throw new Error('The 404 does not use the common skip-link name and target.');
     const statusTargets = await statusPage.locator('a').evaluateAll((items) => items.filter((item) => { const rect = item.getBoundingClientRect(); const style = getComputedStyle(item); return style.display !== 'none' && style.visibility !== 'hidden' && (rect.width < 44 || rect.height < 44); }).map((item) => item.textContent?.trim()));
     if (statusTargets.length) throw new Error(`404 targets under 44px: ${statusTargets.join(', ')}`);
+    const statusFocus = await focusContrast(statusPage, '.action', ['--paper', '--panel']);
+    if (!statusFocus.keyboardFocused || statusFocus.outlineStyle !== 'solid' || statusFocus.outlineWidth < 2 || statusFocus.ratios.some((ratio) => ratio < 3)) throw new Error(`404 focus indicator is below 3:1: ${JSON.stringify(statusFocus)}`);
+    const zoomedStatusHeader = await headerTextLayoutAt200Percent(statusPage);
+    if (zoomedStatusHeader.content !== zoomedStatusHeader.viewport || zoomedStatusHeader.overflow.length || zoomedStatusHeader.overlaps.length || zoomedStatusHeader.crowded.length) throw new Error(`404 header fails at 200% text: ${JSON.stringify(zoomedStatusHeader)}`);
+    const zoomedStatusSkip = await skipLinkLayoutAt200Percent(statusPage);
+    if (!zoomedStatusSkip.viewport || zoomedStatusSkip.hidden.bottom > 0 || zoomedStatusSkip.focused.left < 0 || zoomedStatusSkip.focused.top < 0 || zoomedStatusSkip.focused.right > zoomedStatusSkip.viewport.width || zoomedStatusSkip.focused.bottom > zoomedStatusSkip.viewport.height) throw new Error(`404 skip link fails at 200% text: ${JSON.stringify(zoomedStatusSkip)}`);
+    await statusPage.screenshot({ path: 'artifacts/404-header-200-percent-local.png', fullPage: false });
     await statusPage.screenshot({ path: 'artifacts/404-local.png', fullPage: false });
     await statusContext.close();
 
@@ -532,6 +635,8 @@ try {
       if (violations.length) throw new Error(`Axe found serious violations (${dark ? 'dark' : 'light'}): ${violations.map((violation) => `${violation.id} ${violation.nodes.flatMap((node) => node.target).join(', ')}`).join('; ')}`);
       const shortTargets = await page.locator('button, a').evaluateAll((items) => items.filter((item) => { const rect = item.getBoundingClientRect(); const style = getComputedStyle(item); return !item.closest('[hidden]') && style.display !== 'none' && style.visibility !== 'hidden' && (rect.width < 44 || rect.height < 44); }).map((item) => item.textContent?.trim()));
       if (shortTargets.length) throw new Error(`Interactive targets under 44px: ${shortTargets.join(', ')}`);
+      const focus = await focusContrast(page, '.theme-toggle', ['--paper', '--panel']);
+      if (!focus.keyboardFocused || focus.outlineStyle !== 'solid' || focus.outlineWidth < 2 || focus.ratios.some((ratio) => ratio < 3)) throw new Error(`Focus indicator is below 3:1 (${dark ? 'dark' : 'light'}): ${JSON.stringify(focus)}`);
       await page.keyboard.press('Tab');
       await page.getByRole('region', { name: 'File inventory. Use arrow keys to scroll the table.' }).focus();
       await context.close();

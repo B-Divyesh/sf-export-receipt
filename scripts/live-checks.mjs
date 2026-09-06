@@ -51,6 +51,96 @@ async function readDownload(download) {
   return Buffer.concat(chunks);
 }
 
+function contrastRatio(foreground, background) {
+  const channels = (value) => {
+    const hex = value.trim().match(/^#([\da-f]{6})$/i)?.[1];
+    const rgb = hex
+      ? [hex.slice(0, 2), hex.slice(2, 4), hex.slice(4, 6)].map((part) => Number.parseInt(part, 16))
+      : value.match(/[\d.]+/g)?.slice(0, 3).map(Number);
+    if (!rgb || rgb.length !== 3) throw new Error(`Cannot parse color ${value}.`);
+    return rgb.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+  };
+  const luminance = (value) => {
+    const [red, green, blue] = channels(value);
+    return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+  };
+  const [lighter, darker] = [luminance(foreground), luminance(background)].sort((a, b) => b - a);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+async function headerTextLayoutAt200Percent(page) {
+  await page.evaluate(() => { document.documentElement.style.fontSize = '200%'; });
+  return page.locator('header').evaluate((header) => {
+    const controls = [...header.querySelectorAll('a, button')]
+      .filter((element) => {
+        const style = getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      })
+      .map((element) => {
+        const box = element.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const text = range.getBoundingClientRect();
+        return {
+          name: element.textContent?.trim() || element.getAttribute('aria-label') || element.tagName,
+          box: { left: box.left, top: box.top, right: box.right, bottom: box.bottom },
+          text: { left: text.left, top: text.top, right: text.right, bottom: text.bottom },
+        };
+      });
+    const overflow = controls.filter(({ box, text }) => text.left < box.left - 2 || text.top < box.top - 2 || text.right > box.right + 2 || text.bottom > box.bottom + 2).map(({ name }) => name);
+    const overlaps = [];
+    const crowded = [];
+    for (let first = 0; first < controls.length; first += 1) {
+      for (let second = first + 1; second < controls.length; second += 1) {
+        const a = controls[first].text;
+        const b = controls[second].text;
+        if (Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1) overlaps.push(`${controls[first].name} / ${controls[second].name}`);
+        const aBox = controls[first].box;
+        const bBox = controls[second].box;
+        const horizontalGap = Math.max(bBox.left - aBox.right, aBox.left - bBox.right, 0);
+        const verticalGap = Math.max(bBox.top - aBox.bottom, aBox.top - bBox.bottom, 0);
+        if (Math.max(horizontalGap, verticalGap) < 7.5) crowded.push(`${controls[first].name} / ${controls[second].name}`);
+      }
+    }
+    return { viewport: document.documentElement.clientWidth, content: document.documentElement.scrollWidth, controls, overflow, overlaps, crowded };
+  });
+}
+
+async function skipLinkLayoutAt200Percent(page) {
+  const skip = page.getByRole('link', { name: 'Skip to main content' });
+  const viewport = page.viewportSize();
+  const bounds = (element) => {
+    const box = element.getBoundingClientRect();
+    return { left: box.left, top: box.top, right: box.right, bottom: box.bottom, width: box.width, height: box.height };
+  };
+  const hidden = await skip.evaluate(bounds);
+  await skip.focus();
+  const focused = await skip.evaluate(bounds);
+  await skip.evaluate((element) => element.blur());
+  return { viewport, hidden, focused };
+}
+
+async function focusContrast(page, selector, surfaceVariables) {
+  const target = page.locator(selector).first();
+  await page.evaluate(() => { if (document.activeElement instanceof HTMLElement) document.activeElement.blur(); });
+  for (let presses = 0; presses < 50 && !(await target.evaluate((element) => element === document.activeElement)); presses += 1) await page.keyboard.press('Tab');
+  const evidence = await target.evaluate((element, variables) => {
+    const style = getComputedStyle(element);
+    const tokens = getComputedStyle(document.querySelector('#app') || document.documentElement);
+    return {
+      keyboardFocused: element === document.activeElement && element.matches(':focus-visible'),
+      outlineColor: style.outlineColor,
+      outlineStyle: style.outlineStyle,
+      outlineWidth: Number.parseFloat(style.outlineWidth),
+      surfaces: variables.map((variable) => tokens.getPropertyValue(variable).trim()),
+    };
+  }, surfaceVariables);
+  return { ...evidence, ratios: evidence.surfaces.map((surface) => contrastRatio(evidence.outlineColor, surface)) };
+}
+
 try {
   const root = await freshPage();
   const rootResponse = await root.page.goto(baseURL, { waitUntil: 'networkidle' });
@@ -171,6 +261,11 @@ try {
     assert(geometry.viewport === geometry.content, `${route.path} overflows at 390px: ${JSON.stringify(geometry)}`);
     const skip = view.page.getByRole('link', { name: 'Skip to main content' });
     assert(await skip.count() === 1 && await skip.getAttribute('href') === '#main', `${route.path} skip link is inconsistent.`);
+    const zoomedHeader = await headerTextLayoutAt200Percent(view.page);
+    assert(zoomedHeader.content === zoomedHeader.viewport && !zoomedHeader.overflow.length && !zoomedHeader.overlaps.length && !zoomedHeader.crowded.length, `${route.path} header fails at 200% text: ${JSON.stringify(zoomedHeader)}`);
+    const zoomedSkip = await skipLinkLayoutAt200Percent(view.page);
+    assert(zoomedSkip.viewport && zoomedSkip.hidden.bottom <= 0 && zoomedSkip.focused.left >= 0 && zoomedSkip.focused.top >= 0 && zoomedSkip.focused.right <= zoomedSkip.viewport.width && zoomedSkip.focused.bottom <= zoomedSkip.viewport.height, `${route.path} skip link fails at 200% text: ${JSON.stringify(zoomedSkip)}`);
+    if (route.path === '/') await view.page.screenshot({ path: `${evidenceDir}/repair-3-header-200-percent.png`, fullPage: false });
     if (route.path === '/privacy') {
       const contact = view.page.getByRole('link', { name: 'Ask a question in the Export Receipt repository (opens in a new tab)' });
       assert(await contact.getAttribute('href') === 'https://github.com/B-Divyesh/sf-export-receipt/issues', 'Privacy contact destination is missing.');
@@ -180,7 +275,17 @@ try {
     if (route.path === '/receipt') await view.page.screenshot({ path: `${evidenceDir}/polish-5-receipt-empty-mobile.png`, fullPage: true });
     await view.context.close();
   }
-  record('routes, metadata, legal, mobile, axe', `${routes.length} SPA routes passed direct cold checks`);
+  record('routes, metadata, legal, mobile, axe', `${routes.length} SPA routes passed direct cold and 200% text checks`);
+
+  for (const dark of [false, true]) {
+    const focusView = await freshPage();
+    await demo(focusView.page);
+    if (dark) await focusView.page.getByRole('button', { name: 'Use dark colors' }).click();
+    const focus = await focusContrast(focusView.page, '.theme-toggle', ['--paper', '--panel']);
+    assert(focus.keyboardFocused && focus.outlineStyle === 'solid' && focus.outlineWidth >= 2 && focus.ratios.every((ratio) => ratio >= 3), `${dark ? 'Dark' : 'Light'} focus indicator is below 3:1: ${JSON.stringify(focus)}`);
+    record(`${dark ? 'dark' : 'light'} focus contrast`, focus.ratios.map((ratio) => ratio.toFixed(2)).join(':1, ') + ':1');
+    await focusView.context.close();
+  }
 
   const staticCheck = await freshPage();
   const sitemapResponse = await staticCheck.page.request.get(`${baseURL}/sitemap.xml`);
@@ -194,7 +299,13 @@ try {
   assert(await staticCheck.page.getByRole('link', { name: 'Skip to main content' }).getAttribute('href') === '#main', '404 skip link is inconsistent.');
   const missingViolations = (await new AxeBuilder({ page: staticCheck.page }).analyze()).violations.filter((violation) => ['serious', 'critical'].includes(violation.impact || ''));
   assert(!missingViolations.length, `404 axe violations: ${missingViolations.map((violation) => violation.id).join(', ')}`);
-  await staticCheck.page.screenshot({ path: `${evidenceDir}/polish-5-404-mobile.png`, fullPage: true });
+  const statusFocus = await focusContrast(staticCheck.page, '.action', ['--paper', '--panel']);
+  assert(statusFocus.keyboardFocused && statusFocus.outlineStyle === 'solid' && statusFocus.outlineWidth >= 2 && statusFocus.ratios.every((ratio) => ratio >= 3), `404 focus indicator is below 3:1: ${JSON.stringify(statusFocus)}`);
+  const zoomedStatusHeader = await headerTextLayoutAt200Percent(staticCheck.page);
+  assert(zoomedStatusHeader.content === zoomedStatusHeader.viewport && !zoomedStatusHeader.overflow.length && !zoomedStatusHeader.overlaps.length && !zoomedStatusHeader.crowded.length, `404 header fails at 200% text: ${JSON.stringify(zoomedStatusHeader)}`);
+  const zoomedStatusSkip = await skipLinkLayoutAt200Percent(staticCheck.page);
+  assert(zoomedStatusSkip.viewport && zoomedStatusSkip.hidden.bottom <= 0 && zoomedStatusSkip.focused.left >= 0 && zoomedStatusSkip.focused.top >= 0 && zoomedStatusSkip.focused.right <= zoomedStatusSkip.viewport.width && zoomedStatusSkip.focused.bottom <= zoomedStatusSkip.viewport.height, `404 skip link fails at 200% text: ${JSON.stringify(zoomedStatusSkip)}`);
+  await staticCheck.page.screenshot({ path: `${evidenceDir}/repair-3-404-header-200-percent.png`, fullPage: false });
   const headers = Object.fromEntries(Object.entries(rootResponse?.headers() || {}).map(([key, value]) => [key.toLowerCase(), value]));
   if (productionHost) {
     assert(headers['content-security-policy']?.includes("default-src 'self'") && headers['x-content-type-options'] === 'nosniff' && headers['referrer-policy'] === 'strict-origin-when-cross-origin', `Security headers are incomplete: ${JSON.stringify(headers)}`);
