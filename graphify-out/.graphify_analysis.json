@@ -204,13 +204,13 @@
   },
   "gods": [
     {
-      "id": "tsconfig_compileroptions",
-      "label": "compilerOptions",
+      "id": "src_main_report",
+      "label": "report()",
       "degree": 13
     },
     {
-      "id": "src_main_report",
-      "label": "report()",
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
       "degree": 13
     },
     {
@@ -219,13 +219,13 @@
       "degree": 9
     },
     {
-      "id": "src_main_shell",
-      "label": "shell()",
+      "id": "src_main_render",
+      "label": "render()",
       "degree": 9
     },
     {
-      "id": "src_main_render",
-      "label": "render()",
+      "id": "src_main_shell",
+      "label": "shell()",
       "degree": 9
     },
     {
